@@ -1,3 +1,14 @@
+export interface IResponseProoduct {
+  data: ProductType[];
+  meta: {
+    page: number;
+    total: number;
+    totalPages: number;
+    limit: number;
+    count: number;
+  };
+}
+
 export type ProductType = {
   _id: string;
   name: string;

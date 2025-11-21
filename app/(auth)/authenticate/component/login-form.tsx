@@ -52,7 +52,7 @@ const LogInForm = () => {
   };
 
   return (
-    <div>
+    <div className="h-[350px]">
       <form key="logInForm" onSubmit={form.handleSubmit(onlogIn)} className="flex flex-col gap-3 p-3 items-center">
         <h3 className="font-bold text-2xl text-center">Log In</h3>
         <Controller

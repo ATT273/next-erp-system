@@ -65,37 +65,21 @@ const SignUpForm = () => {
   });
 
   return (
-    <div>
-      <form
-        key="signUpForm"
-        onSubmit={form.handleSubmit(onSignUp)}
-        className="flex flex-col gap-3 p-3 items-center"
-      >
+    <div className="h-[350px]">
+      <form key="signUpForm" onSubmit={form.handleSubmit(onSignUp)} className="flex flex-col gap-3 p-3 items-center">
         <h3 className="font-bold text-2xl text-center">Sign Up</h3>
         <Controller
           name="name"
           control={form.control}
           render={({ field }) => (
-            <Input
-              isRequired
-              label="Name"
-              placeholder="Enter your name"
-              className="w-full"
-              {...field}
-            />
+            <Input isRequired label="Name" placeholder="Enter your name" className="w-full" {...field} />
           )}
         />
         <Controller
           name="email"
           control={form.control}
           render={({ field }) => (
-            <Input
-              isRequired
-              label="Email"
-              placeholder="your@email.com"
-              className="w-full"
-              {...field}
-            />
+            <Input isRequired label="Email" placeholder="your@email.com" className="w-full" {...field} />
           )}
         />
         <Controller

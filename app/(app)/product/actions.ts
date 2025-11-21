@@ -2,13 +2,16 @@
 import { IProductForm, IProductSku } from "@/types/product.type";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/app/actions";
+import { IBaseOptionParams } from "@/types/response.types";
+import { buildUrlWithParams } from "@/utils/api.util";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "${API_URL}";
 
-export const getProducts = async () => {
+export const getProducts = async (params: IBaseOptionParams) => {
   const user = await getSession();
+  const url = buildUrlWithParams(`${API_URL}/products`, params);
   try {
-    const res = await fetch(`${API_URL}/products`, {
+    const res = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

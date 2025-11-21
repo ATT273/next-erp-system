@@ -15,6 +15,10 @@ import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from 
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover";
 import NewSkuDialog from "./modals/new-sku-dialog";
+import { IBaseOptionParams, IResponseMeta } from "@/types/response.types";
+import { DEFAULT_META } from "@/constants/response.constants";
+import CustomPagination from "@/components/ui/Pagination";
+import { getProducts } from "@/app/(app)/product/actions";
 
 const columns = [
   {
@@ -68,15 +72,31 @@ const initialItem = {
   sizes: [],
 };
 export type InitialItemType = typeof initialItem;
-const ProductTable = ({ products }: { products: ProductType[] }) => {
+const ProductTable = () => {
   const [open, setOpen] = useState(false);
   const [deletedProduct, setDeletedProduct] = useState<string>("");
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [isSkuDialogOpen, setIsSkuDialogOpen] = useState<boolean>(false);
-
+  const [products, setProducts] = useState<ProductType[]>([]);
+  const [meta, setMeta] = useState<IResponseMeta>(DEFAULT_META);
   const { toast } = useToast();
   const { setSelectedId, setProductDetails, selectedProductId } = useProductStore();
 
+  const getProductsData = async (params: IBaseOptionParams) => {
+    const result = await getProducts(params);
+    if (result.data) {
+      setProducts(result.data.data);
+      const _meta = result.data.meta || DEFAULT_META;
+      const formattedMeta = {
+        page: _meta.page ? Number(_meta.page) : DEFAULT_META.page,
+        limit: _meta.limit ? Number(_meta.limit) : DEFAULT_META.limit,
+        total: _meta.total ? Number(_meta.total) : DEFAULT_META.total,
+        count: _meta.count ? Number(_meta.count) : DEFAULT_META.count,
+        totalPages: _meta.totalPages ? Number(_meta.totalPages) : DEFAULT_META.totalPages,
+      };
+      setMeta(formattedMeta);
+    }
+  };
   const getDetails = async () => {
     const result = await getProductDetails(selectedProductId);
     if (result.data) setProductDetails(result.data);
@@ -103,6 +123,15 @@ const ProductTable = ({ products }: { products: ProductType[] }) => {
     setSelectedId(itemId);
   };
 
+  const onPageChange = (value: number) => {
+    setMeta((prev) => ({ ...prev, page: value }));
+    const params = {
+      page: value,
+      limit: meta.limit,
+      keyword: "",
+    };
+    getProductsData(params);
+  };
   useEffect(() => {
     if (selectedProductId) {
       getDetails();
@@ -111,41 +140,44 @@ const ProductTable = ({ products }: { products: ProductType[] }) => {
     }
   }, [selectedProductId]);
 
+  useEffect(() => {
+    getProductsData({ page: 1, limit: DEFAULT_META.limit, keyword: "" });
+  }, []);
   return (
     <>
-      <Table aria-label="Product list">
-        <TableHeader>
-          {columns.map((column) => (
-            <TableColumn key={column.key}>{column.label}</TableColumn>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {products && products.length > 0 ? (
-            products.map((item) => (
-              <TableRow key={item._id}>
-                <TableCell>
-                  {item.name} - {item._id}
-                </TableCell>
-                <TableCell>{formatCurrency(item.price)}</TableCell>
-                <TableCell>{item.qty}</TableCell>
-                <TableCell>{mainCategory.find((c) => c.value === item.mainCategory.toString())?.label}</TableCell>
-                <TableCell>{subCategory.find((sc) => sc.value === item.subCategory.toString())?.label}</TableCell>
-                <TableCell>{item.unit}</TableCell>
-                <TableCell>{item.description}</TableCell>
-                <TableCell>
-                  <Button
-                    onPress={() => {
-                      setSelectedId(item._id);
-                      openSkuDialog(item._id);
-                    }}
-                    className="size-8"
-                    variant="ghost"
-                  >
-                    Skus
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  {!open && (
+      <div className="flex-1">
+        <Table aria-label="Product list">
+          <TableHeader>
+            {columns.map((column) => (
+              <TableColumn key={column.key}>{column.label}</TableColumn>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {products && products.length > 0 ? (
+              products.map((item) => (
+                <TableRow key={item._id}>
+                  <TableCell>
+                    {item.name} - {item._id}
+                  </TableCell>
+                  <TableCell>{formatCurrency(item.price)}</TableCell>
+                  <TableCell>{item.qty}</TableCell>
+                  <TableCell>{mainCategory.find((c) => c.value === item.mainCategory.toString())?.label}</TableCell>
+                  <TableCell>{subCategory.find((sc) => sc.value === item.subCategory.toString())?.label}</TableCell>
+                  <TableCell>{item.unit}</TableCell>
+                  <TableCell>{item.description}</TableCell>
+                  <TableCell>
+                    <Button
+                      onPress={() => {
+                        setSelectedId(item._id);
+                        openSkuDialog(item._id);
+                      }}
+                      className="size-8"
+                      variant="ghost"
+                    >
+                      Skus
+                    </Button>
+                  </TableCell>
+                  <TableCell>
                     <Popover key={"context-menu"} placement="bottom">
                       <PopoverTrigger>
                         <Button isIconOnly variant="light">
@@ -183,19 +215,26 @@ const ProductTable = ({ products }: { products: ProductType[] }) => {
                         </ul>
                       </PopoverContent>
                     </Popover>
-                  )}
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center">
+                  No products found
                 </TableCell>
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={8} className="text-center">
-                No products found
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <CustomPagination
+        showControls
+        total={meta.totalPages}
+        initialPage={meta.page}
+        onChange={onPageChange}
+        className="flex justify-end"
+      />
       <EditProduct open={open} setOpen={setOpen} />
       <NewSkuDialog open={isSkuDialogOpen} setOpen={setIsSkuDialogOpen} />
       <Modal isOpen={openDeleteConfirm} onOpenChange={setOpenDeleteConfirm}>
