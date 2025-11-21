@@ -13,7 +13,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="antialiased pl-[15rem]">
+    <div className="antialiased pl-[15rem] h-dvh">
       <Sidebar />
       {children}
     </div>

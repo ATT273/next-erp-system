@@ -11,18 +11,10 @@ const Login = () => {
       <div className="flex flex-col gap-3 p-3 absolute w-1/4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white shadow-md rounded-md">
         <Tabs fullWidth aria-label="authenticate">
           <Tab key="log_in" title="Log In">
-            <Card className="min-h-[350px]">
-              <CardBody>
-                <LogInForm />
-              </CardBody>
-            </Card>
+            <LogInForm />
           </Tab>
           <Tab key="sign_up" title="Sign Up">
-            <Card className="min-h-[350px]">
-              <CardBody>
-                <SignUpForm />
-              </CardBody>
-            </Card>
+            <SignUpForm />
           </Tab>
         </Tabs>
       </div>
