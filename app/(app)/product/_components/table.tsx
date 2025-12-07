@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ProductType } from "@/types/product.type";
 import EditIcon from "@/components/icons/edit";
 import Trash from "@/components/icons/trash";
@@ -14,11 +14,9 @@ import { Button } from "@heroui/button";
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from "@heroui/table";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover";
-import NewSkuDialog from "./modals/new-sku-dialog";
-import { IBaseOptionParams, IResponseMeta } from "@/types/response.types";
-import { DEFAULT_META } from "@/constants/response.constants";
+import NewSkuDialog, { SKUDialogRef } from "./modals/new-sku-dialog";
 import CustomPagination from "@/components/ui/Pagination";
-import { getProducts } from "@/app/(app)/product/actions";
+import useGetProducts from "../_hooks/use-get-products";
 
 const columns = [
   {
@@ -60,7 +58,7 @@ const columns = [
 ];
 
 const initialItem = {
-  _id: "",
+  id: "",
   name: "",
   price: 0,
   qty: 0,
@@ -73,30 +71,15 @@ const initialItem = {
 };
 export type InitialItemType = typeof initialItem;
 const ProductTable = () => {
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [deletedProduct, setDeletedProduct] = useState<string>("");
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [isSkuDialogOpen, setIsSkuDialogOpen] = useState<boolean>(false);
-  const [products, setProducts] = useState<ProductType[]>([]);
-  const [meta, setMeta] = useState<IResponseMeta>(DEFAULT_META);
-  const { toast } = useToast();
-  const { setSelectedId, setProductDetails, selectedProductId } = useProductStore();
 
-  const getProductsData = async (params: IBaseOptionParams) => {
-    const result = await getProducts(params);
-    if (result.data) {
-      setProducts(result.data.data);
-      const _meta = result.data.meta || DEFAULT_META;
-      const formattedMeta = {
-        page: _meta.page ? Number(_meta.page) : DEFAULT_META.page,
-        limit: _meta.limit ? Number(_meta.limit) : DEFAULT_META.limit,
-        total: _meta.total ? Number(_meta.total) : DEFAULT_META.total,
-        count: _meta.count ? Number(_meta.count) : DEFAULT_META.count,
-        totalPages: _meta.totalPages ? Number(_meta.totalPages) : DEFAULT_META.totalPages,
-      };
-      setMeta(formattedMeta);
-    }
-  };
+  const SKUModalRef = useRef<SKUDialogRef>(null);
+  const { setSelectedId, setProductDetails, selectedProductId } = useProductStore();
+  const { meta, productsData, getProductsData } = useGetProducts();
   const getDetails = async () => {
     const result = await getProductDetails(selectedProductId);
     if (result.data) setProductDetails(result.data);
@@ -118,13 +101,8 @@ const ProductTable = () => {
     }
   };
 
-  const openSkuDialog = (itemId: string) => {
-    setIsSkuDialogOpen(true);
-    setSelectedId(itemId);
-  };
-
   const onPageChange = (value: number) => {
-    setMeta((prev) => ({ ...prev, page: value }));
+    // setMeta((prev) => ({ ...prev, page: value }));
     const params = {
       page: value,
       limit: meta.limit,
@@ -141,11 +119,14 @@ const ProductTable = () => {
   }, [selectedProductId]);
 
   useEffect(() => {
-    getProductsData({ page: 1, limit: DEFAULT_META.limit, keyword: "" });
+    getProductsData({
+      page: 1,
+      limit: 5,
+    });
   }, []);
   return (
-    <>
-      <div className="flex-1">
+    <div className="flex flex-col gap-4 flex-1">
+      <div className="flex-1 overflow-y-auto">
         <Table aria-label="Product list">
           <TableHeader>
             {columns.map((column) => (
@@ -153,11 +134,11 @@ const ProductTable = () => {
             ))}
           </TableHeader>
           <TableBody>
-            {products && products.length > 0 ? (
-              products.map((item) => (
-                <TableRow key={item._id}>
+            {productsData && productsData.length > 0 ? (
+              productsData.map((item) => (
+                <TableRow key={item.id}>
                   <TableCell>
-                    {item.name} - {item._id}
+                    {item.name} - {item.id}
                   </TableCell>
                   <TableCell>{formatCurrency(item.price)}</TableCell>
                   <TableCell>{item.qty}</TableCell>
@@ -168,8 +149,8 @@ const ProductTable = () => {
                   <TableCell>
                     <Button
                       onPress={() => {
-                        setSelectedId(item._id);
-                        openSkuDialog(item._id);
+                        setSelectedId(item.id);
+                        SKUModalRef.current?.handleOpen();
                       }}
                       className="size-8"
                       variant="ghost"
@@ -178,43 +159,45 @@ const ProductTable = () => {
                     </Button>
                   </TableCell>
                   <TableCell>
-                    <Popover key={"context-menu"} placement="bottom">
-                      <PopoverTrigger>
-                        <Button isIconOnly variant="light">
-                          <ThreeDots className="text-slate-900 size-4" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="rounded-md p-0 overflow-x-hidden">
-                        <ul>
-                          <li>
-                            <Button
-                              variant="light"
-                              className="w-full rounded-none"
-                              onPress={() => {
-                                setOpen(true);
-                                setSelectedId(item._id);
-                              }}
-                              startContent={<EditIcon className="text-teal-500 size-4" />}
-                            >
-                              <p className="text-slate-900 ml-2">Edit</p>
-                            </Button>
-                          </li>
-                          <li>
-                            <Button
-                              variant="light"
-                              className="w-full rounded-none"
-                              onPress={() => {
-                                setOpenDeleteConfirm(true);
-                                setDeletedProduct(item._id);
-                              }}
-                              startContent={<Trash className="text-red-500 size-4" />}
-                            >
-                              <p className="text-slate-900 ml-2">Delete</p>
-                            </Button>
-                          </li>
-                        </ul>
-                      </PopoverContent>
-                    </Popover>
+                    {!open && (
+                      <Popover key={"context-menu"} placement="bottom">
+                        <PopoverTrigger>
+                          <Button isIconOnly variant="light">
+                            <ThreeDots className="text-slate-900 size-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="rounded-md p-0 overflow-x-hidden">
+                          <ul>
+                            <li>
+                              <Button
+                                variant="light"
+                                className="w-full rounded-none"
+                                onPress={() => {
+                                  setOpen(true);
+                                  setSelectedId(item.id);
+                                }}
+                                startContent={<EditIcon className="text-teal-500 size-4" />}
+                              >
+                                <p className="text-slate-900 ml-2">Edit</p>
+                              </Button>
+                            </li>
+                            <li>
+                              <Button
+                                variant="light"
+                                className="w-full rounded-none"
+                                onPress={() => {
+                                  setOpenDeleteConfirm(true);
+                                  setDeletedProduct(item.id);
+                                }}
+                                startContent={<Trash className="text-red-500 size-4" />}
+                              >
+                                <p className="text-slate-900 ml-2">Delete</p>
+                              </Button>
+                            </li>
+                          </ul>
+                        </PopoverContent>
+                      </Popover>
+                    )}
                   </TableCell>
                 </TableRow>
               ))
@@ -236,7 +219,7 @@ const ProductTable = () => {
         className="flex justify-end"
       />
       <EditProduct open={open} setOpen={setOpen} />
-      <NewSkuDialog open={isSkuDialogOpen} setOpen={setIsSkuDialogOpen} />
+      <NewSkuDialog ref={SKUModalRef} open={isSkuDialogOpen} setOpen={setIsSkuDialogOpen} />
       <Modal isOpen={openDeleteConfirm} onOpenChange={setOpenDeleteConfirm}>
         <ModalContent>
           {(onClose) => (
@@ -265,10 +248,7 @@ const ProductTable = () => {
           )}
         </ModalContent>
       </Modal>
-      {/* <Pagination
-        total={10}
-        initialPage={1} /> */}
-    </>
+    </div>
   );
 };
 

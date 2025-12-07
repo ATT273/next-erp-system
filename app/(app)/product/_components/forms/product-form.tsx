@@ -74,7 +74,7 @@ const ProductForm = ({ handleSubmit, closeDrawer }: Props) => {
   };
 
   useEffect(() => {
-    if (productDetails._id) {
+    if (productDetails.id) {
       // fetch productDetail
       formInfo.reset({
         name: productDetails.name,

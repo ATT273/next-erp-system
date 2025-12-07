@@ -1,11 +1,8 @@
+import { useEffect, useMemo, useState, useImperativeHandle, ForwardedRef } from "react";
 import { IProductImage, IProductSku } from "@/types/product.type";
 import { formatCurrency } from "@/utils/common.util";
 import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
-import { Select, SelectItem } from "@heroui/select";
-import { useEffect, useMemo, useState } from "react";
-import { useFormContext, Controller, useWatch } from "react-hook-form";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import NewSkuForm from "../forms/new-sku-form";
 import { ImagePlus, X } from "lucide-react";
 import { useProductStore } from "../../_store/product-store";
@@ -13,19 +10,17 @@ import Image from "next/image";
 import { updateProductSku } from "../../actions";
 import useToast from "@/app/(app)/_hooks/use-toast";
 
-interface Props {
+export interface SKUDialogRef {
+  handleOpen: () => void;
+  handleClose: () => void;
+}
+interface SKUMdalProps {
+  ref?: ForwardedRef<SKUDialogRef>;
   open: boolean;
   setOpen: (open: boolean) => void;
 }
-
-const initialValue = {
-  sku: "",
-  size: "",
-  qty: 0,
-  price: 0,
-};
-
-const NewSkuDialog = ({ open, setOpen }: Props) => {
+const NewSkuDialog = ({ ref, open, setOpen }: SKUMdalProps) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const { setSelectedId, setProductDetails, selectedProductId, productDetails } = useProductStore();
   const [skuItems, setSKUItems] = useState<IProductSku[]>([]);
   const [showImages, setShowImages] = useState<boolean>(false);
@@ -85,10 +80,30 @@ const NewSkuDialog = ({ open, setOpen }: Props) => {
     }
   };
 
+  const handleOpen = () => {
+    onOpen();
+    setOpen(true);
+  };
+  const handleClose = () => {
+    onClose();
+    setOpen(false);
+    setSelectedId("");
+    setProductDetails({} as any);
+    setSKUItems([]);
+  };
+  useImperativeHandle(
+    ref,
+    () => ({
+      handleOpen,
+      handleClose,
+    }),
+    []
+  );
+
   return (
-    <Modal isOpen={open} onOpenChange={onOpenChange} size="xl" isDismissable={false}>
+    <Modal isOpen={isOpen} size="2xl" onClose={onClose} isDismissable={false}>
       <ModalContent>
-        {(onClose) => (
+        {() => (
           <>
             <ModalHeader className="flex flex-col gap-1">
               <p className="text-lg">Create new variant</p>
@@ -147,9 +162,6 @@ const NewSkuDialog = ({ open, setOpen }: Props) => {
                                 height={300}
                                 className="object-cover w-[100px] h-[100px]"
                               />
-                              {/* <div className="absolute top-1 right-1 cursor-pointer">
-                                              <X className="bg-white rounded-full" onClick={() => setFiles(files.filter((_, i) => i !== index))} />
-                                            </div> */}
                             </div>
                           );
                         })}
@@ -160,7 +172,7 @@ const NewSkuDialog = ({ open, setOpen }: Props) => {
               </div>
             </ModalBody>
             <ModalFooter>
-              <Button variant="light" onPress={() => setOpen(false)}>
+              <Button variant="light" onPress={handleClose}>
                 Cancel
               </Button>
               <Button className="bg-emerald-500" onPress={handleSubmit}>
