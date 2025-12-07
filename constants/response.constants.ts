@@ -5,3 +5,5 @@ export const DEFAULT_META = {
   count: 0,
   totalPages: 0,
 };
+
+export const LIMIT = 10;

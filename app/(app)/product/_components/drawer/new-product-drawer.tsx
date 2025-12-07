@@ -55,6 +55,9 @@ const NewProduct = () => {
     }
   };
 
+  const onOpenChange = (open: boolean) => {
+    setOpen(open);
+  };
   useEffect(() => {
     const localUser = localStorage.getItem("user");
     if (localUser) {
@@ -70,7 +73,7 @@ const NewProduct = () => {
 
   return (
     <div className="">
-      <Drawer isOpen={open} onOpenChange={setOpen} size="xl" isDismissable={false}>
+      <Drawer isOpen={open} onOpenChange={onOpenChange} size="xl" isDismissable={false}>
         <DrawerContent>
           <ProductForm closeDrawer={setOpen} handleSubmit={handleSubmit} />
         </DrawerContent>

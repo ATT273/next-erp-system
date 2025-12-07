@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Sidebar from "@/components/layouts/sidebar";
-import { getRoleList } from "./role/actions";
 
 export const metadata: Metadata = {
   title: "CRM NextJS",

@@ -22,6 +22,13 @@ export const MENU = [
     permissions: ["ACCESS", "EDIT", "DELETE"],
   },
   {
+    key: "inventory",
+    title: "Inventory",
+    icon: "Inventory",
+    href: "/inventory",
+    permissions: ["ACCESS", "EDIT", "DELETE"],
+  },
+  {
     key: "role",
     title: "Roles",
     icon: "Roles",

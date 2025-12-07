@@ -1,16 +1,8 @@
-export interface IResponseProoduct {
-  data: ProductType[];
-  meta: {
-    page: number;
-    total: number;
-    totalPages: number;
-    limit: number;
-    count: number;
-  };
-}
+import { IResponseMeta } from "./response.types";
 
+// RESPONSE TYPE FROM API
 export type ProductType = {
-  _id: string;
+  id: string;
   name: string;
   description: string;
   price: number;
@@ -24,6 +16,12 @@ export type ProductType = {
   images: IProductImage[];
 };
 
+export interface IProductResponse {
+  data: ProductType[];
+  meta: IResponseMeta | null;
+}
+
+// PAYLOAD TYPE FOR CREATING/UPDATING PRODUCT
 export type CreateProductType = {
   name: string;
   description: string;
