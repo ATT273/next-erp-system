@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useImperativeHandle, ForwardedRef } from "react";
-import { IProductImage, IProductSku } from "@/types/product.type";
+import { IProductImage, IProductImageResponse, IProductSku } from "@/types/product.type";
 import { formatCurrency } from "@/utils/common.util";
 import { Button } from "@heroui/button";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
@@ -23,11 +23,11 @@ const NewSkuDialog = ({ ref, open, setOpen }: SKUMdalProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { setSelectedId, setProductDetails, selectedProductId, productDetails } = useProductStore();
   const [skuItems, setSKUItems] = useState<IProductSku[]>([]);
-  const [showImages, setShowImages] = useState<boolean>(false);
-  const [productImages, setProductImages] = useState<IProductImage[]>([]);
+  const [showImages, setShowImages] = useState<string>("");
+  const [productImages, setProductImages] = useState<IProductImageResponse[]>([]);
   const { toast } = useToast();
 
-  const onSubmit = (data: IProductSku) => {
+  const handleAddNewSku = (data: IProductSku) => {
     setSKUItems((prev) => [...prev, data]);
   };
 
@@ -41,23 +41,17 @@ const NewSkuDialog = ({ ref, open, setOpen }: SKUMdalProps) => {
     setSKUItems(newSkuItems);
   };
 
-  const onOpenChange = (open: boolean) => {
-    if (!open) {
-      setSelectedId("");
-      setProductDetails({} as any);
-      setSKUItems([]);
+  const handleSelectImage = (skuIndex: number, image: IProductImageResponse) => {
+    const newSkus = [...skuItems];
+    const selectedSKU = newSkus[skuIndex];
+    if (selectedSKU) {
+      const toAdd = !selectedSKU.images.some((img) => img?.productImageId === image.id);
+      const _images = toAdd
+        ? [...selectedSKU.images, { ...image, id: crypto.randomUUID(), productImageId: image.id }]
+        : selectedSKU.images.filter((img) => img.productImageId !== image.id);
+      selectedSKU.images = _images;
     }
-  };
 
-  const handleSelectImage = (skuIndex: number, image: IProductImage) => {
-    const newSkus = [...skuItems].map((item: IProductSku, index: number) => {
-      if (index === skuIndex) {
-        const toAdd = !item.images.some((img) => img.id === image.id);
-        const _images = toAdd ? [...item.images, image] : item.images.filter((img) => img.id !== image.id);
-        item.images = _images;
-      }
-      return item;
-    });
     setSKUItems(newSkus);
   };
 
@@ -68,10 +62,7 @@ const NewSkuDialog = ({ ref, open, setOpen }: SKUMdalProps) => {
         title: "Success",
         message: "Product variants updated successfully",
       });
-      setOpen(false);
-      setSelectedId("");
-      setProductDetails({} as any);
-      setSKUItems([]);
+      handleClose();
     } else {
       toast.error({
         title: "Fail",
@@ -90,7 +81,10 @@ const NewSkuDialog = ({ ref, open, setOpen }: SKUMdalProps) => {
     setSelectedId("");
     setProductDetails({} as any);
     setSKUItems([]);
+    setProductImages([]);
+    setShowImages("");
   };
+
   useImperativeHandle(
     ref,
     () => ({
@@ -101,7 +95,7 @@ const NewSkuDialog = ({ ref, open, setOpen }: SKUMdalProps) => {
   );
 
   return (
-    <Modal isOpen={isOpen} size="2xl" onClose={onClose} isDismissable={false}>
+    <Modal isOpen={isOpen} size="2xl" onClose={handleClose} isDismissable={false}>
       <ModalContent>
         {() => (
           <>
@@ -109,7 +103,7 @@ const NewSkuDialog = ({ ref, open, setOpen }: SKUMdalProps) => {
               <p className="text-lg">Create new variant</p>
             </ModalHeader>
             <ModalBody>
-              <NewSkuForm open={open} setOpen={setOpen} handleSubmit={onSubmit} />
+              <NewSkuForm open={open} setOpen={setOpen} handleSubmit={handleAddNewSku} />
               <div>
                 {skuItems.map((item, index) => (
                   <div key={item.sku} className="p-2 border border-gray-200 rounded-md mb-2">
@@ -126,7 +120,7 @@ const NewSkuDialog = ({ ref, open, setOpen }: SKUMdalProps) => {
                           title="link images"
                           variant="light"
                           className="grid place-items-center hover:text-green-500 text-gray-500 data-[hover=true]:bg-transparent"
-                          onPress={() => setShowImages(true)}
+                          onPress={() => setShowImages(item.sku)}
                           isIconOnly
                         >
                           <ImagePlus className="size-4" />
@@ -141,10 +135,10 @@ const NewSkuDialog = ({ ref, open, setOpen }: SKUMdalProps) => {
                         </Button>
                       </div>
                     </div>
-                    {showImages && (
+                    {showImages === item.sku && (
                       <div className="flex gap-2 flex-wrap">
                         {productImages.map((image, idx) => {
-                          const isSelected = item.images?.some((img) => img.id === image.id);
+                          const isSelected = item.images?.some((img) => img.productImageId === image.id);
                           return (
                             <div
                               key={idx}

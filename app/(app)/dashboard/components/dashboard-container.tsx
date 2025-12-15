@@ -2,7 +2,7 @@ import React from "react";
 import { DashboardProvider } from "./dashboard-provider";
 import DashboardSummary from "./dashboard-summary";
 import DashboardTable from "./table";
-import { InventoryType } from "@/types/inventories.type";
+import { InventoryType } from "@/types/inventory.type";
 
 interface IDashboardContainerProps {
   summary: Record<InventoryType, number>;

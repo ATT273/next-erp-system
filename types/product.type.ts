@@ -16,6 +16,21 @@ export type ProductType = {
   images: IProductImage[];
 };
 
+export type ProductResponseType = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  mainCategory: number;
+  subCategory: number;
+  unit: string;
+  qty: number;
+  sizes: string[];
+  importPrice: number;
+  skus: IProductSku[];
+  images: IProductImageResponse[];
+};
+
 export interface IProductResponse {
   data: ProductType[];
   meta: IResponseMeta | null;
@@ -40,12 +55,25 @@ export interface IProductSku {
   size: string;
   qty: number;
   price: number;
-  images: IProductImage[];
+  images: IProductSKUImage[];
 }
 export interface IProductImage {
   url: string;
+  id?: number;
+  name: string;
+}
+
+export interface IProductImageResponse {
+  url: string;
+  id: number;
+  name: string;
+}
+
+export interface IProductSKUImage {
+  url: string;
   id?: string;
   name: string;
+  productImageId: number;
 }
 
 export type ClientImage = {
