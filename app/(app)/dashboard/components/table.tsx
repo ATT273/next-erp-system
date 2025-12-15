@@ -81,7 +81,6 @@ const DashboardTable = () => {
     };
     getInventoriesData(params);
   }, [type]);
-  console.log("summaries", summaries);
   return (
     <div className="flex flex-col gap-4 flex-1">
       <div className="flex-1">
