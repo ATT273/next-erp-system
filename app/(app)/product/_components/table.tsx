@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { ProductType } from "@/types/product.type";
+import { ProductResponseType } from "@/types/product.type";
 import EditIcon from "@/components/icons/edit";
 import Trash from "@/components/icons/trash";
 import ThreeDots from "@/components/icons/three-dot";
@@ -17,6 +17,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover";
 import NewSkuDialog, { SKUDialogRef } from "./modals/new-sku-dialog";
 import CustomPagination from "@/components/ui/Pagination";
 import useGetProducts from "../_hooks/use-get-products";
+import { Package } from "lucide-react";
 
 const columns = [
   {
@@ -49,7 +50,7 @@ const columns = [
   },
   {
     key: "sku",
-    label: "",
+    label: "SKU",
   },
   {
     key: "edit",
@@ -114,7 +115,7 @@ const ProductTable = () => {
     if (selectedProductId) {
       getDetails();
     } else {
-      setProductDetails({} as ProductType);
+      setProductDetails({} as ProductResponseType);
     }
   }, [selectedProductId]);
 
@@ -124,6 +125,7 @@ const ProductTable = () => {
       limit: 5,
     });
   }, []);
+
   return (
     <div className="flex flex-col gap-4 flex-1">
       <div className="flex-1 overflow-y-auto">
@@ -152,10 +154,12 @@ const ProductTable = () => {
                         setSelectedId(item.id);
                         SKUModalRef.current?.handleOpen();
                       }}
-                      className="size-8"
+                      className="size-8 border-0"
+                      isIconOnly
                       variant="ghost"
+                      title="sku"
                     >
-                      Skus
+                      <Package className="size-4" />
                     </Button>
                   </TableCell>
                   <TableCell>

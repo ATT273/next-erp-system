@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useDashboard } from "./dashboard-provider";
 import { getInventories, getInventoryByType } from "../actions";
-import { IInventoryResponse } from "@/types/inventories.type";
+import { InventoryItem } from "@/types/inventory.type";
 import { CHANGE_TYPE_LABELS } from "@/constants/dashboard.constants";
 import { ChipColor } from "@/types/heroui.types";
 import { Chip } from "@heroui/chip";
@@ -44,7 +44,7 @@ const columns = [
 
 const DashboardTable = () => {
   const { type } = useDashboard();
-  const [summaries, setSummaries] = useState<IInventoryResponse[]>([]);
+  const [summaries, setSummaries] = useState<InventoryItem[]>([]);
   const [meta, setMeta] = useState<IResponseMeta>(DEFAULT_META);
   const getInventoriesData = async (params: IBaseOptionParams) => {
     const result = type === "TOTAL" ? await getInventories({ ...params }) : await getInventories({ ...params, type });
@@ -81,7 +81,6 @@ const DashboardTable = () => {
     };
     getInventoriesData(params);
   }, [type]);
-
   return (
     <div className="flex flex-col gap-4 flex-1">
       <div className="flex-1">
@@ -94,30 +93,30 @@ const DashboardTable = () => {
             ))}
           </TableHeader>
           <TableBody>
-            {summaries.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="w-[220px]">{item.id}</TableCell>
-                <TableCell>
-                  <Link
-                    isExternal
-                    showAnchorIcon
-                    href={`product/${item.id}`}
-                    className="text-zinc-500 hover:text-sky-500"
-                  >
-                    {item.productName}
-                  </Link>
-                </TableCell>
-                <TableCell className="w-[100px]">{item.skuCode}</TableCell>
-                <TableCell className="w-[100px] text-center">
-                  <Chip
-                    color={CHANGE_TYPE_LABELS[item.changeType as keyof typeof CHANGE_TYPE_LABELS].color as ChipColor}
-                  >
-                    {item.changeType}
-                  </Chip>
-                </TableCell>
-                <TableCell className="w-[150px] text-right">{item.qtyChange}</TableCell>
-              </TableRow>
-            ))}
+            {summaries.map((item) => {
+              const chipColor =
+                CHANGE_TYPE_LABELS[item.changeType as keyof typeof CHANGE_TYPE_LABELS]?.color ?? "default";
+              return (
+                <TableRow key={item.id}>
+                  <TableCell className="w-[220px]">{item.id}</TableCell>
+                  <TableCell>
+                    <Link
+                      isExternal
+                      showAnchorIcon
+                      href={`product/${item.id}`}
+                      className="text-zinc-500 hover:text-sky-500"
+                    >
+                      {item.productName}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="w-[100px]">{item.skuCode}</TableCell>
+                  <TableCell className="w-[100px] text-center">
+                    <Chip color={chipColor as ChipColor}>{item.changeType}</Chip>
+                  </TableCell>
+                  <TableCell className="w-[150px] text-right">{item.qtyChange}</TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>

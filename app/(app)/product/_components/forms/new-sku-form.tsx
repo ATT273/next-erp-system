@@ -59,7 +59,7 @@ const NewSkuForm = ({ open, setOpen, handleSubmit }: Props) => {
   const handleAddSku = (data: IProductSku) => {
     setIsValid(validateForm(data, true));
     if (isValid.size && isValid.qty && isValid.price) {
-      const _data = { ...data, id: crypto.randomUUID(), images: [] };
+      const _data = { ...data, images: [] };
       handleSubmit(_data);
       setNewSku(initialValue);
     }
@@ -73,7 +73,7 @@ const NewSkuForm = ({ open, setOpen, handleSubmit }: Props) => {
       (item) => item.value === (productDetails ? productDetails.subCategory : "")
     )?.code;
     const _sku = mainCategoryCode && subCategoryCode ? `${mainCategoryCode}.${subCategoryCode}.${size}` : size;
-    setNewSku({ ...newSku, size: size, sku: _sku });
+    setNewSku({ ...newSku, size, sku: _sku });
   };
 
   useEffect(() => {
