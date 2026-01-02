@@ -2,13 +2,15 @@
 import { IUserResponse } from "@/types/user.type";
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from "@heroui/table";
 import { useUserContext } from "../_context/user-provider";
-import { Button } from "@heroui/button";
-import { PenBox, Trash2 } from "lucide-react";
+import { PenBox, Trash2, RefreshCw } from "lucide-react";
 import { deleteUser } from "../actions";
 import useToast from "@/app/(app)/_hooks/use-toast";
-import NewUser from "./new-user-dialog";
 import EditUserDialog from "./edit-user-dialog";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import ResetPasswordDialog from "./reset-password-dialog";
+import { TableActionMenuItem } from "@/types/table.type";
+import TableActionMenu from "@/components/customs/table-context-menu";
+import AlertDialog, { AlertDialogRef } from "@/components/ui/AlertDialog";
 
 const columns = [
   {
@@ -38,16 +40,20 @@ const columns = [
 ];
 
 const UserTable = ({ data }: { data: IUserResponse[] | null }) => {
-  const { roles, editingUser, setEditingUser } = useUserContext();
+  const { roles, setEditingUser } = useUserContext();
   const { toast } = useToast();
   const [opened, setOpened] = useState(false);
+  const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
+
+  const [toDeleteId, setToDeleteId] = useState<string>("");
+  const deleteAlertRef = useRef<AlertDialogRef>(null);
 
   const handleEdit = (item: IUserResponse) => {
     setEditingUser(item);
     setOpened(true);
   };
-  const handleDelete = async (id: string) => {
-    const result = await deleteUser(id);
+  const handleDelete = async () => {
+    const result = await deleteUser(toDeleteId);
     if (result.status === 200) {
       toast.success({
         title: "Success",
@@ -60,6 +66,25 @@ const UserTable = ({ data }: { data: IUserResponse[] | null }) => {
       });
     }
   };
+
+  const onConfirmDelete = (id: string) => {
+    setToDeleteId(id);
+    deleteAlertRef.current?.handleOpen();
+  };
+
+  const handleResetPassword = (item: IUserResponse) => {
+    setEditingUser(item);
+    setOpenPasswordDialog(true);
+  };
+
+  const generateActionMenu = useCallback((item: IUserResponse): TableActionMenuItem[] => {
+    return [
+      { key: "edit", title: "Edit", onClick: () => handleEdit(item), icon: PenBox },
+      { key: "reset-password", title: "Reset password", onClick: () => handleResetPassword(item), icon: RefreshCw },
+      { key: "delete", title: "Delete", onClick: () => onConfirmDelete(item.id), icon: Trash2 },
+    ];
+  }, []);
+
   return (
     <>
       <Table aria-label="user table" className="table-fixed min-w-full">
@@ -73,6 +98,7 @@ const UserTable = ({ data }: { data: IUserResponse[] | null }) => {
         <TableBody>
           {data && data.length > 0 ? (
             data.map((item) => {
+              const actionMenuItems = generateActionMenu(item);
               const role = roles.find((role) => role.code === item.roleCode);
               return (
                 <TableRow key={item.id}>
@@ -88,18 +114,7 @@ const UserTable = ({ data }: { data: IUserResponse[] | null }) => {
                     )}
                   </TableCell>
                   <TableCell className="max-w-[50px]">
-                    <Button
-                      isIconOnly
-                      startContent={<PenBox className="size-4" />}
-                      onPress={() => handleEdit(item)}
-                      className="text-emerald-500 bg-transparent hover:bg-emerald-500 hover:text-white"
-                    />
-                    <Button
-                      isIconOnly
-                      startContent={<Trash2 className="size-4" />}
-                      onPress={() => handleDelete(item.id)}
-                      className="text-red-500 bg-transparent hover:bg-red-500 hover:text-white"
-                    />
+                    <TableActionMenu menuItems={actionMenuItems} resource="user" />
                   </TableCell>
                 </TableRow>
               );
@@ -111,7 +126,9 @@ const UserTable = ({ data }: { data: IUserResponse[] | null }) => {
           )}
         </TableBody>
       </Table>
+      <AlertDialog ref={deleteAlertRef} title="Delete user" onConfirm={handleDelete} />
       <EditUserDialog opened={opened} setOpened={setOpened} />
+      <ResetPasswordDialog opened={openPasswordDialog} setOpened={setOpenPasswordDialog} />
       {/* <Pagination
         total={10}
         initialPage={1} /> */}

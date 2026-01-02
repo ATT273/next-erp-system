@@ -1,9 +1,7 @@
 "use client";
 import { SubmitHandler } from "react-hook-form";
-import { useEffect, useState } from "react";
-import { permissionsValue } from "@/constants";
 import { updateProduct } from "../../actions";
-import { ClientImage, IProductForm, IProductPayload, IProductSku, ProductType } from "@/types/product.type";
+import { ClientImage, IProductForm, IProductPayload, IProductSku, ProductResponseType } from "@/types/product.type";
 import useToast from "../../../_hooks/use-toast";
 import ProductForm from "../forms/product-form";
 import { useProductStore } from "../../_store/product-store";
@@ -11,12 +9,6 @@ import { Drawer, DrawerContent } from "@heroui/drawer";
 import { useUploadFiles } from "../../_hooks/use-upload-file";
 
 const EditProduct = ({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) => {
-  // const [opened, setOpened] = useState(false);
-  const [permissions, setPermissions] = useState({
-    access: false,
-    edit: false,
-    delete: false,
-  });
   const { toast } = useToast();
   const { setSelectedId, selectedProductId, setProductDetails } = useProductStore();
   const { uploading, uploadFiles } = useUploadFiles();
@@ -60,22 +52,10 @@ const EditProduct = ({ open, setOpen }: { open: boolean; setOpen: (open: boolean
   const onOpenChange = (open: boolean) => {
     if (!open) {
       setSelectedId("");
-      setProductDetails({} as ProductType);
+      setProductDetails({} as ProductResponseType);
     }
     setOpen(open);
   };
-  useEffect(() => {
-    const localUser = localStorage.getItem("user");
-    if (localUser) {
-      const user = JSON.parse(localUser);
-      const _permissions = {
-        access: !!(user.permissions & permissionsValue.ACCESS),
-        edit: !!(user.permissions & permissionsValue.EDIT),
-        delete: !!(user.permissions & permissionsValue.DELETE),
-      };
-      setPermissions(_permissions);
-    }
-  }, []);
 
   return (
     <div>

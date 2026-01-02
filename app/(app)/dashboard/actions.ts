@@ -2,9 +2,10 @@
 
 import { getSession } from "@/app/actions";
 import { API_URL } from "@/constants";
-import { IInventoryResponse, InventoryType } from "@/types/inventories.type";
+import { InventoryResponse, InventoryType } from "@/types/inventory.type";
 import { IBaseOptionParams } from "@/types/response.types";
 import { buildUrlWithParams } from "@/utils/api.util";
+// import { } from "next"
 
 export const getSummary = async () => {
   const user = await getSession();
@@ -13,7 +14,7 @@ export const getSummary = async () => {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
       },
     });
     const jsonRes = await res.json();
@@ -45,7 +46,7 @@ export const getInventoryByType = async (
 ): Promise<{
   status: number;
   data: {
-    data: IInventoryResponse[];
+    data: InventoryResponse[];
     meta: { page: number; limit: number; total: number; count: number; totalPages: number } | null;
   };
 }> => {
@@ -55,7 +56,7 @@ export const getInventoryByType = async (
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
       },
     });
     const jsonRes = await res.json();
@@ -80,7 +81,7 @@ export const getInventories = async (
 ): Promise<{
   status: number;
   data: {
-    data: IInventoryResponse[];
+    data: InventoryResponse[];
     meta: { page: number; limit: number; total: number; count: number; totalPages: number } | null;
   };
 }> => {
@@ -94,7 +95,7 @@ export const getInventories = async (
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
       },
     });
     const jsonRes = await res.json();

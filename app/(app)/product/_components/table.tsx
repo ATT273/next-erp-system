@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { ProductResponseType } from "@/types/product.type";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ProductResponseType, ProductType } from "@/types/product.type";
 import EditIcon from "@/components/icons/edit";
 import Trash from "@/components/icons/trash";
 import ThreeDots from "@/components/icons/three-dot";
@@ -17,7 +17,12 @@ import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover";
 import NewSkuDialog, { SKUDialogRef } from "./modals/new-sku-dialog";
 import CustomPagination from "@/components/ui/Pagination";
 import useGetProducts from "../_hooks/use-get-products";
-import { Package } from "lucide-react";
+import { Package, PenBox, Trash2 } from "lucide-react";
+import { TableActionMenuItem } from "@/types/table.type";
+import AlertDialog, { AlertDialogRef } from "@/components/ui/AlertDialog";
+import TableActionMenu from "@/components/customs/table-context-menu";
+import { canEdit } from "@/utils/rbac.utils";
+import { useAuth } from "../../_providers/authProvider";
 
 const columns = [
   {
@@ -73,10 +78,13 @@ const initialItem = {
 export type InitialItemType = typeof initialItem;
 const ProductTable = () => {
   const { toast } = useToast();
+  const { permissions } = useAuth();
   const [open, setOpen] = useState(false);
-  const [deletedProduct, setDeletedProduct] = useState<string>("");
-  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
+
   const [isSkuDialogOpen, setIsSkuDialogOpen] = useState<boolean>(false);
+
+  const [toDeleteId, setToDeleteId] = useState<string>("");
+  const deleteAlertRef = useRef<AlertDialogRef>(null);
 
   const SKUModalRef = useRef<SKUDialogRef>(null);
   const { setSelectedId, setProductDetails, selectedProductId } = useProductStore();
@@ -86,10 +94,15 @@ const ProductTable = () => {
     if (result.data) setProductDetails(result.data);
   };
 
-  const handleDeleteProduct = async (id: string) => {
-    const result = await deleteProduct(id);
+  const _canEdit = useMemo(() => {
+    if (!permissions) return false;
+    return canEdit(permissions, "product");
+  }, [permissions]);
+
+  const handleDeleteProduct = async () => {
+    if (!toDeleteId) return;
+    const result = await deleteProduct(toDeleteId);
     if (result.status === 200) {
-      setOpenDeleteConfirm(false);
       toast.success({
         title: "Success",
         message: "Product deleted successfully",
@@ -103,13 +116,22 @@ const ProductTable = () => {
   };
 
   const onPageChange = (value: number) => {
-    // setMeta((prev) => ({ ...prev, page: value }));
     const params = {
       page: value,
       limit: meta.limit,
       keyword: "",
     };
     getProductsData(params);
+  };
+
+  const onConfirmDelete = (id: string) => {
+    setToDeleteId(id);
+    deleteAlertRef.current?.handleOpen();
+  };
+
+  const handleEdit = (id: string) => {
+    setSelectedId(id);
+    setOpen(true);
   };
   useEffect(() => {
     if (selectedProductId) {
@@ -126,6 +148,13 @@ const ProductTable = () => {
     });
   }, []);
 
+  const generateActionMenu = useCallback((item: ProductType): TableActionMenuItem[] => {
+    return [
+      { key: "edit", title: "Edit", onClick: () => handleEdit(item.id), icon: PenBox },
+      { key: "delete", title: "Delete", onClick: () => onConfirmDelete(item.id), icon: Trash2 },
+    ];
+  }, []);
+
   return (
     <div className="flex flex-col gap-4 flex-1">
       <div className="flex-1 overflow-y-auto">
@@ -137,74 +166,40 @@ const ProductTable = () => {
           </TableHeader>
           <TableBody>
             {productsData && productsData.length > 0 ? (
-              productsData.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>
-                    {item.name} - {item.id}
-                  </TableCell>
-                  <TableCell>{formatCurrency(item.price)}</TableCell>
-                  <TableCell>{item.qty}</TableCell>
-                  <TableCell>{mainCategory.find((c) => c.value === item.mainCategory.toString())?.label}</TableCell>
-                  <TableCell>{subCategory.find((sc) => sc.value === item.subCategory.toString())?.label}</TableCell>
-                  <TableCell>{item.unit}</TableCell>
-                  <TableCell>{item.description}</TableCell>
-                  <TableCell>
-                    <Button
-                      onPress={() => {
-                        setSelectedId(item.id);
-                        SKUModalRef.current?.handleOpen();
-                      }}
-                      className="size-8 border-0"
-                      isIconOnly
-                      variant="ghost"
-                      title="sku"
-                    >
-                      <Package className="size-4" />
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    {!open && (
-                      <Popover key={"context-menu"} placement="bottom">
-                        <PopoverTrigger>
-                          <Button isIconOnly variant="light">
-                            <ThreeDots className="text-slate-900 size-4" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="rounded-md p-0 overflow-x-hidden">
-                          <ul>
-                            <li>
-                              <Button
-                                variant="light"
-                                className="w-full rounded-none"
-                                onPress={() => {
-                                  setOpen(true);
-                                  setSelectedId(item.id);
-                                }}
-                                startContent={<EditIcon className="text-teal-500 size-4" />}
-                              >
-                                <p className="text-slate-900 ml-2">Edit</p>
-                              </Button>
-                            </li>
-                            <li>
-                              <Button
-                                variant="light"
-                                className="w-full rounded-none"
-                                onPress={() => {
-                                  setOpenDeleteConfirm(true);
-                                  setDeletedProduct(item.id);
-                                }}
-                                startContent={<Trash className="text-red-500 size-4" />}
-                              >
-                                <p className="text-slate-900 ml-2">Delete</p>
-                              </Button>
-                            </li>
-                          </ul>
-                        </PopoverContent>
-                      </Popover>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
+              productsData.map((item) => {
+                const actionMenuItems = generateActionMenu(item);
+                return (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      {item.name} - {item.id}
+                    </TableCell>
+                    <TableCell>{formatCurrency(item.price)}</TableCell>
+                    <TableCell>{item.qty}</TableCell>
+                    <TableCell>{mainCategory.find((c) => c.value === item.mainCategory.toString())?.label}</TableCell>
+                    <TableCell>{subCategory.find((sc) => sc.value === item.subCategory.toString())?.label}</TableCell>
+                    <TableCell>{item.unit}</TableCell>
+                    <TableCell>{item.description}</TableCell>
+                    <TableCell>
+                      <Button
+                        onPress={() => {
+                          setSelectedId(item.id);
+                          SKUModalRef.current?.handleOpen();
+                        }}
+                        className="size-8 border-0"
+                        isIconOnly
+                        variant="ghost"
+                        title="sku"
+                        disabled={!_canEdit}
+                      >
+                        <Package className="size-4" />
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      <TableActionMenu menuItems={actionMenuItems} resource="product" />
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="text-center">
@@ -224,34 +219,7 @@ const ProductTable = () => {
       />
       <EditProduct open={open} setOpen={setOpen} />
       <NewSkuDialog ref={SKUModalRef} open={isSkuDialogOpen} setOpen={setIsSkuDialogOpen} />
-      <Modal isOpen={openDeleteConfirm} onOpenChange={setOpenDeleteConfirm}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">"Confirm delete"</ModalHeader>
-              <ModalBody>
-                <p className="text-slate-900 mb-2">Are you sure you want to delete this product?</p>
-              </ModalBody>
-              <ModalFooter>
-                <div className="flex gap-2 w-full justify-end">
-                  <Button
-                    onPress={() => setOpenDeleteConfirm(false)}
-                    className="grid place-items-center size-8 p-0 text-slate-900"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onPress={() => handleDeleteProduct(deletedProduct)}
-                    className="grid place-items-center size-8 text-white"
-                  >
-                    Delete
-                  </Button>
-                </div>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <AlertDialog ref={deleteAlertRef} title="Delete product" onConfirm={handleDeleteProduct} />
     </div>
   );
 };

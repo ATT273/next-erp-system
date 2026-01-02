@@ -8,6 +8,7 @@ import { getUsers } from "../actions";
 import { getRoleList } from "../../role/actions";
 import { IUserResponse } from "@/types/user.type";
 import { RoleType } from "@/types/role.type";
+import { useAuth } from "../../_providers/authProvider";
 
 interface Props {
   users?: IUserResponse[];

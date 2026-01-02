@@ -46,11 +46,11 @@ const SignUpForm = () => {
         name: values.name,
       });
 
-      if (!res?.ok) {
-        setError(res?.error ? res?.error : "Invalid email or password");
-        if (res?.url) router.replace("/");
+      if (res.status === 400) {
+        setError(res?.message ? res.message : "Unknown error");
+        router.replace("/");
       } else {
-        if (res?.url) router.replace("/dashboard");
+        router.replace("/dashboard");
         setError("");
       }
     } catch (error) {

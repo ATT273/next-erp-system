@@ -1,17 +1,17 @@
 import { getSession } from "@/app/actions";
 import { redirect } from "next/navigation";
-import { permissionsValue } from "@/constants";
 import Forbidden from "@/components/pages/forbiden";
 import InventoryTable from "./_components/table";
 import NewInventory from "./_components/modal/new-inventory-modal";
-import { getProducts } from "../product/actions";
+import { canAccess } from "@/utils/rbac.utils";
 
 const Product = async () => {
   const session = await getSession();
   if (!session) {
     redirect("/authenticate");
   } else {
-    if (!(session.permissions & permissionsValue.ACCESS)) {
+    const _canAccess = canAccess(session.permissions, "inventory");
+    if (!_canAccess) {
       return <Forbidden />;
     }
   }

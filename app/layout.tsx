@@ -3,6 +3,8 @@ import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
 import clsx from "clsx";
 import { fontSans } from "@/config/fonts";
+import AuthProvider from "./(app)/_providers/authProvider";
+import { getSession } from "./actions";
 
 export const metadata: Metadata = {
   title: "CRM - NextJS",
@@ -24,6 +26,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getSession();
+
   return (
     <html suppressHydrationWarning lang="en" className="light">
       <body className={clsx("min-h-screen text-foreground bg-background font-sans antialiased", fontSans.variable)}>
@@ -36,7 +40,7 @@ export default async function RootLayout({
             disableTransitionOnChange: true,
           }}
         >
-          {children}
+          <AuthProvider initialSession={session}>{children}</AuthProvider>
         </HeroProviders>
       </body>
     </html>

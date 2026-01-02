@@ -3,7 +3,7 @@ import { Button } from "@heroui/button";
 import { Drawer, DrawerContent } from "@heroui/drawer";
 import { SubmitHandler } from "react-hook-form";
 import { useEffect, useState } from "react";
-import { permissionsValue } from "@/constants";
+import { PERMISSION_VALUE } from "@/constants";
 import { createProduct, createProductSku } from "../../actions";
 import { ClientImage, IProductForm, IProductPayload, IProductSku } from "@/types/product.type";
 import useToast from "../../../_hooks/use-toast";
@@ -63,9 +63,9 @@ const NewProduct = () => {
     if (localUser) {
       const user = JSON.parse(localUser);
       const _permissions = {
-        access: !!(user.permissions & permissionsValue.ACCESS),
-        edit: !!(user.permissions & permissionsValue.EDIT),
-        delete: !!(user.permissions & permissionsValue.DELETE),
+        access: !!(user.permissions & PERMISSION_VALUE.ACCESS),
+        edit: !!(user.permissions & PERMISSION_VALUE.EDIT),
+        delete: !!(user.permissions & PERMISSION_VALUE.DELETE),
       };
       setPermissions(_permissions);
     }

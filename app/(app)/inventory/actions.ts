@@ -31,7 +31,7 @@ export const getInventories = async (
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
       },
     });
     const jsonRes = await res.json();
@@ -63,7 +63,7 @@ export const createInventory = async (data: IInventoryPayload) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
       },
       body: JSON.stringify(data),
     });
@@ -87,7 +87,7 @@ export const deleteInventory = async (id: string): Promise<{ status: number; mes
     const res = await fetch(`${API_URL}/inventories/${id}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
       },
     });
     const jsonRes: { status: number; message: string } = await res.json();
@@ -115,7 +115,7 @@ export const updateInventory = async (
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
       },
       body: JSON.stringify(data),
     });
@@ -146,7 +146,7 @@ export const getInventoryDetails = async (
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
       },
     });
     const jsonRes = await res.json();

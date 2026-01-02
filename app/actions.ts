@@ -1,7 +1,8 @@
 "use server";
+import { ISession } from "@/types/auth.types";
 import { cookies } from "next/headers";
 
-export const getSession = async () => {
+export const getSession = async (): Promise<ISession | null> => {
   const cookieStore = await cookies();
   if (cookieStore) {
     const session = cookieStore.get("session");

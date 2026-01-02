@@ -1,12 +1,10 @@
-export * from "./environment.constants";
+import { IMenu } from "@/types/auth.types";
 
-export const permissionsValue = {
-  ACCESS: 1,
-  EDIT: 2,
-  DELETE: 4,
-  ASSIGN: 8,
-};
-export const MENU = [
+export * from "./environment.constants";
+export * from "./rbac.constants";
+export * from "./dashboard.constants";
+
+export const MENU: IMenu[] = [
   {
     key: "dashboard",
     title: "Dashboard",
