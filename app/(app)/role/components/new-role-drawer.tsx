@@ -4,7 +4,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { permissionsValue, MENU } from "@/constants";
+import { PERMISSION_VALUE, MENU } from "@/constants";
 import { RoleType } from "@/types/role.type";
 import { createRole } from "@/app/(app)/role/actions";
 import useToast from "../../_hooks/use-toast";
@@ -77,9 +77,9 @@ const NewRole = () => {
     if (localUser) {
       const user = JSON.parse(localUser);
       const _permissions = {
-        access: !!(user.permissions & permissionsValue.ACCESS),
-        edit: !!(user.permissions & permissionsValue.EDIT),
-        delete: !!(user.permissions & permissionsValue.DELETE),
+        access: !!(user.permissions & PERMISSION_VALUE.ACCESS),
+        edit: !!(user.permissions & PERMISSION_VALUE.EDIT),
+        delete: !!(user.permissions & PERMISSION_VALUE.DELETE),
       };
       setPermissions(_permissions);
     }
@@ -133,9 +133,8 @@ const NewRole = () => {
                     <div className="flex flex-col gap-2" key={menu.key}>
                       <h3 className="font-semibold text-md">{menu.title}</h3>
                       <div className="flex gap-2 px-3">
-                        {/* {formInfo.getValues().permissions[menu.key]} */}
                         {menu.permissions.map((permission) => {
-                          const _permission = permissionsValue[permission as keyof typeof permissionsValue];
+                          const _permission = PERMISSION_VALUE[permission as keyof typeof PERMISSION_VALUE];
                           return (
                             <div key={permission}>
                               <Checkbox

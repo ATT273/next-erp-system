@@ -13,3 +13,7 @@ export interface IFormUser {
   email: string;
   dob: string;
 }
+
+export interface IResetPasswordForm {
+  password: string;
+}

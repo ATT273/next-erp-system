@@ -11,7 +11,7 @@ export const getUserDetails = async (id: string) => {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${user.accessToken}`,
+      Authorization: `Bearer ${user?.accessToken}`,
     },
   });
   if (!res || res.status !== 200) {
@@ -29,7 +29,7 @@ export const getUsers = async (): Promise<{ status: number; data: IUserResponse[
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
       },
     });
     if (res.status === 200) {
@@ -60,7 +60,7 @@ export const deleteUser = async (id: string): Promise<{ status: number; data: nu
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
       },
     });
     const jsonRes = await res.json();
@@ -85,7 +85,7 @@ export const createUser = async (data: IFormUser): Promise<{ status: number; cod
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
       },
       body: JSON.stringify(data),
     });
@@ -115,7 +115,33 @@ export const updateUser = async (
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
+      },
+      body: JSON.stringify(data),
+    });
+    const jsonRes = await res.json();
+    if (res.status === 200) {
+      revalidatePath("/(app)/user", "page");
+    }
+    return { status: jsonRes.data.status, code: jsonRes.data.code, message: jsonRes.data.message };
+  } catch (error) {
+    console.log("error", error);
+    return {
+      status: 500,
+      code: "INTERNAL_ERROR",
+      message: "An unknown error occurred",
+    };
+  }
+};
+
+export const resetUserPassword = async (data: { id: string; password: string }) => {
+  const user = await getSession();
+  try {
+    const res = await fetch(`${API_URL}/users/reset-password/${data.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user?.accessToken}`,
       },
       body: JSON.stringify(data),
     });

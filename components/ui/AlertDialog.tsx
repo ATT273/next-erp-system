@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@heroui/button";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
-import { useImperativeHandle, useState } from "react";
+import { useImperativeHandle } from "react";
 
 export interface AlertDialogRef {
   handleOpen: () => void;

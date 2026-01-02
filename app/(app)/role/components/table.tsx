@@ -1,7 +1,9 @@
 "use client";
 import RoleTableRow from "./table-row";
 import { RoleType } from "@/types/role.type";
-import { Table, TableHeader, TableBody, TableColumn } from "@heroui/table";
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from "@heroui/table";
+import AssignPermissionDialog, { AssignPermissionDialogRef } from "./assign-role-dialog";
+import { useRef, useState } from "react";
 
 const columns = [
   {
@@ -41,6 +43,13 @@ const columns = [
   },
 ];
 const RoleTable = ({ roles }: { roles: RoleType[] }) => {
+  const AssignRoleDialogRef = useRef<AssignPermissionDialogRef>(null);
+  const [selectedRole, setSelectedRole] = useState<RoleType>();
+
+  const hanldeOpenAssignDialog = (item: RoleType) => {
+    setSelectedRole(item);
+    AssignRoleDialogRef.current?.handleOpen();
+  };
   return (
     <>
       <Table aria-label="Role list" className="p-2">
@@ -52,12 +61,21 @@ const RoleTable = ({ roles }: { roles: RoleType[] }) => {
           ))}
         </TableHeader>
         <TableBody emptyContent="No data">
-          {roles && roles.length > 0 ? roles.map((item) => RoleTableRow({ item })) : []}
+          {roles && roles.length > 0 ? (
+            roles.map((item) =>
+              RoleTableRow({
+                item,
+                openAssignRoleDialog: () => hanldeOpenAssignDialog(item),
+              })
+            )
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length}>No data available</TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
-      {/* <Pagination
-        total={10}
-        initialPage={1} /> */}
+      <AssignPermissionDialog ref={AssignRoleDialogRef} item={selectedRole} />
     </>
   );
 };

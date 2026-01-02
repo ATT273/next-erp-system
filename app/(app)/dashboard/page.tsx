@@ -1,11 +1,10 @@
 import { redirect } from "next/navigation";
-
 import { getSession } from "@/app/actions";
 import Forbidden from "@/components/pages/forbiden";
-import { permissionsValue } from "@/constants";
 import { getSummary } from "./actions";
 
 import DashboardContainer from "./components/dashboard-container";
+import { canAccess } from "@/utils/rbac.utils";
 
 const Dashboard = async () => {
   const session = await getSession();
@@ -14,7 +13,8 @@ const Dashboard = async () => {
   if (!session) {
     redirect("/authenticate");
   } else {
-    if (!(session.permissions & permissionsValue.ACCESS)) {
+    const _canAccess = canAccess(session.permissions, "user");
+    if (!_canAccess) {
       return <Forbidden />;
     }
   }

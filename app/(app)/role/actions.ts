@@ -11,7 +11,7 @@ export const createRole = async (data: any) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
       },
       body: JSON.stringify(data),
     });
@@ -32,7 +32,7 @@ export const getRoleList = async () => {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
       },
     });
     const jsonRes = await res.json();
@@ -66,7 +66,7 @@ export const updateRole = async (data: any) => {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
       },
       body: JSON.stringify(data),
     });
@@ -87,7 +87,7 @@ export const deleteRole = async (id: string) => {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
+        Authorization: `Bearer ${user?.accessToken}`,
       },
     });
     const jsonRes = await res.json();

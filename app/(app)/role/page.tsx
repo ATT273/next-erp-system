@@ -3,16 +3,17 @@ import RoleTable from "./components/table";
 import { getSession } from "@/app/actions";
 import { redirect } from "next/navigation";
 import Forbidden from "@/components/pages/forbiden";
-import { permissionsValue } from "@/constants";
 import NewRole from "./components/new-role-drawer";
 import { getRoleList } from "./actions";
+import { canAccess } from "@/utils/rbac.utils";
 
 const Role = async () => {
   const session = await getSession();
   if (!session) {
     redirect("/authenticate");
   } else {
-    if (!(session.permissions & permissionsValue.ACCESS)) {
+    const _canAccess = canAccess(session.permissions, "user");
+    if (!_canAccess) {
       return <Forbidden />;
     }
   }
