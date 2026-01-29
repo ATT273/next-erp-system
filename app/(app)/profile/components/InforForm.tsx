@@ -1,18 +1,19 @@
 "use client";
 
 import { z } from "zod";
-// import { useState } from 'react';
 import { updateInfo } from "../actions";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { getLocalUser } from "@/utils/session";
 import { getUserDetails } from "@/app/(app)/user/actions";
-import { Form, Input, Button, DatePicker } from "@heroui/react";
+import { Form, Input, Button, DatePicker, CalendarDate } from "@heroui/react";
 import { Controller, useForm } from "react-hook-form";
 import { parseDate } from "@internationalized/date";
 import { addToast } from "@heroui/toast";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { I18nProvider } from "@react-aria/i18n";
 
 const formInfoSchema = z.object({
+  id: z.string(),
   email: z.string().email({
     message: "Invalid email address",
   }),
@@ -22,27 +23,10 @@ const formInfoSchema = z.object({
   dob: z.string(),
 });
 
-type LocalUser = {
-  id: string;
-  email: string;
-  name: string;
-  accessToken: string;
-  status: number;
-};
-
-const initUser = {
-  id: "",
-  email: "",
-  name: "",
-  accessToken: "",
-  status: 0,
-};
-
 const InforForm = () => {
-  const [localUser, setLocalUser] = useState<LocalUser>(initUser);
-  const [value, setValue] = useState(parseDate("2024-04-04"));
   const formInfo = useForm({
     defaultValues: {
+      id: "",
       email: "",
       name: "",
       dob: "",
@@ -52,8 +36,8 @@ const InforForm = () => {
   });
   useEffect(() => {
     const _localUser = getLocalUser();
-    if (_localUser.id) {
-      getDetail(_localUser.id);
+    if (_localUser.data.id) {
+      getDetail(_localUser.data.id);
     }
   }, []);
 
@@ -61,6 +45,7 @@ const InforForm = () => {
     const res = await getUserDetails(id);
     if (res.status === 200) {
       formInfo.reset({
+        id: res.data.id,
         email: res.data.email,
         name: res.data.name,
         dob: res.data.dob,
@@ -68,7 +53,7 @@ const InforForm = () => {
     }
   };
   const onSubmit = async (values: z.infer<typeof formInfoSchema>) => {
-    const res = await updateInfo(values.email, values.name, values.dob, localUser?.id);
+    const res = await updateInfo(values.email, values.name, values.dob, values.id);
     if (res.status === 200) {
       addToast({
         title: "Success",
@@ -116,12 +101,14 @@ const InforForm = () => {
           name="dob"
           control={formInfo.control}
           render={({ field }) => (
-            <DatePicker
-              className="w-full"
-              label="Date of Birth"
-              // value={value}
-              // onChange={setValue}
-            />
+            <I18nProvider locale="en-GB">
+              <DatePicker
+                className="w-full"
+                label="Date of Birth"
+                value={field.value ? (parseDate(field.value) as unknown as CalendarDate) : null}
+                onChange={field.onChange}
+              />
+            </I18nProvider>
           )}
         />
         <div className="flex justify-end w-full">

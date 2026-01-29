@@ -6,10 +6,11 @@ import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
-import { DatePicker, Form } from "@heroui/react";
+import { CalendarDate, DatePicker, Form } from "@heroui/react";
 import { IFormUser, IUserResponse } from "@/types/user.type";
 import { useUserContext } from "../_context/user-provider";
 import { parseDate, DateValue } from "@internationalized/date";
+import { I18nProvider } from "@react-aria/i18n";
 
 interface NewUserProps {
   initialData?: null | IUserResponse;
@@ -110,28 +111,25 @@ const NewUserForm = ({ initialData = null, setOpen, handleSubmit }: NewUserProps
           name="dob"
           control={form.control}
           render={({ field, fieldState }) => {
-            const parseValue = field.value ? parseDate(field.value) : null;
+            const parseValue = field.value ? (parseDate(field.value) as unknown as CalendarDate) : null;
             return (
-              <DatePicker
-                label="Date of Birth"
-                className="grow"
-                size="sm"
-                validationBehavior="aria"
-                isInvalid={fieldState.invalid}
-                name={field.name}
-                value={parseValue}
-                formatOptions={{
-                  day: "2-digit",
-                  month: "short", // "numeric" | "2-digit" | "short" | "long" | "narrow"
-                  year: "numeric",
-                }}
-                errorMessage={fieldState.error?.message}
-                onChange={(value) => {
-                  if (value) {
-                    field.onChange((value as DateValue).toString());
-                  }
-                }}
-              />
+              <I18nProvider locale="en-GB">
+                <DatePicker
+                  label="Date of Birth"
+                  className="grow"
+                  size="sm"
+                  validationBehavior="aria"
+                  isInvalid={fieldState.invalid}
+                  name={field.name}
+                  value={parseValue}
+                  errorMessage={fieldState.error?.message}
+                  onChange={(value) => {
+                    if (value) {
+                      field.onChange((value as DateValue).toString());
+                    }
+                  }}
+                />
+              </I18nProvider>
             );
           }}
         />
