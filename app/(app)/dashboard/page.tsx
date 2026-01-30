@@ -8,16 +8,16 @@ import { canAccess } from "@/utils/rbac.utils";
 
 const Dashboard = async () => {
   const session = await getSession();
-  const summary = await getSummary();
 
   if (!session) {
     redirect("/authenticate");
   } else {
-    const _canAccess = canAccess(session.permissions, "user");
-    if (!_canAccess) {
+    const _canAccess = canAccess(session.permissions!, "dashboard");
+    if (!_canAccess || !session.roleActive) {
       return <Forbidden />;
     }
   }
+  const summary = await getSummary();
 
   return (
     <div className="flex flex-col h-full gap-4 p-3 relative">

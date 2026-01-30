@@ -18,7 +18,8 @@ const iconColors = {
   default: "text-teal-500 size-4",
 };
 const TableActionMenu = ({ menuItems, resource }: TableActionMenuProps) => {
-  const { permissions } = useAuth();
+  const { authSession } = useAuth();
+  const permissions = authSession?.permissions;
   const _canEdit = useMemo(() => {
     if (!permissions) return false;
     return canEdit(permissions, resource);

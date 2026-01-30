@@ -9,11 +9,12 @@ import { canAccess } from "@/utils/rbac.utils";
 
 const Role = async () => {
   const session = await getSession();
+
   if (!session) {
     redirect("/authenticate");
   } else {
-    const _canAccess = canAccess(session.permissions, "user");
-    if (!_canAccess) {
+    const _canAccess = canAccess(session.permissions!, "role");
+    if (!_canAccess || !session.roleActive) {
       return <Forbidden />;
     }
   }

@@ -1,14 +1,12 @@
 "use client";
 import { ISession, Permissions } from "@/types/auth.types";
-import { createContext, useContext, useState } from "react";
+import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
 
 interface IAuthContext {
-  id?: string;
-  email?: string;
-  name?: string;
-  permissions?: Permissions;
-  setAuthSession: (value: ISession) => void;
+  authSession?: ISession;
+  setAuthSession: Dispatch<SetStateAction<ISession>>;
 }
+
 const AuthContext = createContext<IAuthContext | null>(null);
 
 const AuthProvider = ({
@@ -22,7 +20,7 @@ const AuthProvider = ({
   return (
     <AuthContext.Provider
       value={{
-        ...authSession,
+        authSession,
         setAuthSession,
       }}
     >

@@ -74,7 +74,7 @@ export const updateRole = async (data: any) => {
     if (jsonRes.status === 200) {
       revalidatePath("/role", "page");
     }
-    return { status: res.status, message: jsonRes.message, data: null };
+    return { status: res.status, message: jsonRes.message, data: jsonRes.data };
   } catch (error) {
     return { status: 500, message: "Internal Server Error", data: null };
   }

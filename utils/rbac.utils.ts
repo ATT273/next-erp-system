@@ -52,7 +52,7 @@ export function canAssign(userPermissions: Permissions, resource: Resource): boo
 export function hasAllPermissions(
   userPermissions: Permissions,
   resource: Resource,
-  permissions: PermissionKey[]
+  permissions: PermissionKey[],
 ): boolean {
   return permissions.every((permission) => hasPermission(userPermissions, resource, permission));
 }
@@ -67,7 +67,7 @@ export function hasAllPermissions(
 export function hasAnyPermission(
   userPermissions: Permissions,
   resource: Resource,
-  permissions: PermissionKey[]
+  permissions: PermissionKey[],
 ): boolean {
   return permissions.some((permission) => hasPermission(userPermissions, resource, permission));
 }

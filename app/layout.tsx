@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { fontSans } from "@/config/fonts";
 import AuthProvider from "./(app)/_providers/authProvider";
 import { getSession } from "./actions";
+import { SocketProvider } from "./(app)/_providers/socketProvider";
 
 export const metadata: Metadata = {
   title: "CRM - NextJS",
@@ -40,7 +41,9 @@ export default async function RootLayout({
             disableTransitionOnChange: true,
           }}
         >
-          <AuthProvider initialSession={session}>{children}</AuthProvider>
+          <AuthProvider initialSession={session}>
+            <SocketProvider>{children}</SocketProvider>
+          </AuthProvider>
         </HeroProviders>
       </body>
     </html>

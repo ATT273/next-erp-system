@@ -78,7 +78,8 @@ const initialItem = {
 export type InitialItemType = typeof initialItem;
 const ProductTable = () => {
   const { toast } = useToast();
-  const { permissions } = useAuth();
+  const { authSession } = useAuth();
+  const permissions = authSession?.permissions;
   const [open, setOpen] = useState(false);
 
   const [isSkuDialogOpen, setIsSkuDialogOpen] = useState<boolean>(false);
@@ -170,9 +171,7 @@ const ProductTable = () => {
                 const actionMenuItems = generateActionMenu(item);
                 return (
                   <TableRow key={item.id}>
-                    <TableCell>
-                      {item.name} - {item.id}
-                    </TableCell>
+                    <TableCell>{item.name}</TableCell>
                     <TableCell>{formatCurrency(item.price)}</TableCell>
                     <TableCell>{item.qty}</TableCell>
                     <TableCell>{mainCategory.find((c) => c.value === item.mainCategory.toString())?.label}</TableCell>

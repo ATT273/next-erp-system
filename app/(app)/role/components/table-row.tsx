@@ -37,26 +37,26 @@ interface RoleTableRowProps {
   openAssignRoleDialog: () => void;
 }
 const RoleTableRow = ({ item, openAssignRoleDialog }: RoleTableRowProps) => {
-  const { permissions } = useAuth();
+  const { authSession } = useAuth();
 
   const [showMore, setShowMore] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedRole, setSelectedRole] = useState(initialValues);
 
   const { toast } = useToast();
-
+  const permissions = authSession?.permissions;
   const _canEdit = useMemo(() => {
     if (!permissions) return false;
-    return canEdit(permissions, "user");
+    return canEdit(permissions, "role");
   }, [permissions]);
 
   const _canDelete = useMemo(() => {
     if (!permissions) return false;
-    return canDelete(permissions, "user");
+    return canDelete(permissions, "role");
   }, [permissions]);
   const _canAssign = useMemo(() => {
     if (!permissions) return false;
-    return canAssign(permissions, "user");
+    return canEdit(permissions, "role");
   }, [permissions]);
 
   const handleSubmit = async () => {
