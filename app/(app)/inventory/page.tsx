@@ -10,8 +10,8 @@ const Product = async () => {
   if (!session) {
     redirect("/authenticate");
   } else {
-    const _canAccess = canAccess(session.permissions, "inventory");
-    if (!_canAccess) {
+    const _canAccess = canAccess(session.permissions!, "inventory");
+    if (!_canAccess || !session.roleActive) {
       return <Forbidden />;
     }
   }

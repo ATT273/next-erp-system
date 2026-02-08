@@ -3,7 +3,10 @@ import { Accordion, AccordionItem, Divider } from "@heroui/react";
 import { Lock } from "@/components/icons/lock";
 import PasswordForm from "./PasswordForm";
 import InforForm from "./InforForm";
+import { useAuth } from "../../_providers/authProvider";
 const PageContent = () => {
+  const { authSession } = useAuth();
+
   return (
     <div>
       <title>Profile | CRM</title>

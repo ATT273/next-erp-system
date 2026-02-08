@@ -1,11 +1,13 @@
 import { PERMISSION_VALUE } from "@/constants";
 
 export interface ISession {
-  id: string;
-  email: string;
+  id?: string;
+  email?: string;
   name: string;
-  accessToken: string;
-  permissions: Permissions;
+  accessToken?: string;
+  roleCode?: string;
+  roleActive?: boolean;
+  permissions?: Permissions;
 }
 
 export interface IPermissions {
@@ -24,5 +26,5 @@ export interface IMenu {
 }
 
 export type PermissionKey = keyof typeof PERMISSION_VALUE;
-export type Resource = "dashboard" | "product" | "user" | "role" | "inventory";
+export type Resource = "dashboard" | "product" | "user" | "role" | "inventory" | "profile";
 export type Permissions = Record<Resource, number>;

@@ -53,6 +53,7 @@ export const logIn = async ({ email, password }: { email: string; password: stri
     if (jsonRes.status === 200) {
       const permissions = jsonRes.data.permissions ? JSON.parse(jsonRes.data.permissions) : {};
       const _session = JSON.stringify({ ...jsonRes.data, permissions });
+
       cookie.set("session", _session, {
         httpOnly: true,
         secure: true,

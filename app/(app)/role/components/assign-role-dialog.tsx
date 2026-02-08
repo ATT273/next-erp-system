@@ -7,6 +7,7 @@ import { updateRole } from "@/app/(app)/role/actions";
 import useToast from "../../_hooks/use-toast";
 import { togglePermission } from "@/utils/rbac.utils";
 import { PermissionKey } from "@/types/auth.types";
+import { useAuth } from "../../_providers/authProvider";
 
 export interface AssignPermissionDialogRef {
   handleOpen: () => void;
@@ -21,7 +22,7 @@ const AssignPermissionDialog = ({ ref, item }: AssignPermissionDialogProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedRole, setSelectedRole] = useState<RoleType>();
   const { toast } = useToast();
-
+  const { setAuthSession } = useAuth();
   const handleAssignPermission = (menu: string, permission: PermissionKey) => {
     if (!selectedRole) return;
 
@@ -70,7 +71,7 @@ const AssignPermissionDialog = ({ ref, item }: AssignPermissionDialogProps) => {
       handleOpen,
       handleClose,
     }),
-    []
+    [],
   );
 
   if (!selectedRole) return null;

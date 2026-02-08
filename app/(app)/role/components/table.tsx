@@ -3,7 +3,8 @@ import RoleTableRow from "./table-row";
 import { RoleType } from "@/types/role.type";
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from "@heroui/table";
 import AssignPermissionDialog, { AssignPermissionDialogRef } from "./assign-role-dialog";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "../../_providers/authProvider";
 
 const columns = [
   {
@@ -42,14 +43,16 @@ const columns = [
     class: "w-[5rem] text-center",
   },
 ];
+
 const RoleTable = ({ roles }: { roles: RoleType[] }) => {
   const AssignRoleDialogRef = useRef<AssignPermissionDialogRef>(null);
   const [selectedRole, setSelectedRole] = useState<RoleType>();
-
+  const { authSession } = useAuth();
   const hanldeOpenAssignDialog = (item: RoleType) => {
     setSelectedRole(item);
     AssignRoleDialogRef.current?.handleOpen();
   };
+
   return (
     <>
       <Table aria-label="Role list" className="p-2">
@@ -66,7 +69,7 @@ const RoleTable = ({ roles }: { roles: RoleType[] }) => {
               RoleTableRow({
                 item,
                 openAssignRoleDialog: () => hanldeOpenAssignDialog(item),
-              })
+              }),
             )
           ) : (
             <TableRow>
