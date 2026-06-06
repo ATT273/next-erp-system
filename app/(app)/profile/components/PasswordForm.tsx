@@ -5,18 +5,12 @@ import { updatePassword } from "../actions";
 import { getLocalUser } from "@/utils/session";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@heroui/input";
-import { Button } from "@heroui/button";
-import { addToast } from "@heroui/toast";
+import { TextField, Label, Input, Button, toast } from "@heroui/react";
 
 const formChangePWSchema = z
   .object({
-    newPassword: z.string().min(6, {
-      message: "New password must be at least 6 characters",
-    }),
-    confirmPassword: z.string().min(6, {
-      message: "Confirm password must be at least 6 characters",
-    }),
+    newPassword: z.string().min(6, { message: "New password must be at least 6 characters" }),
+    confirmPassword: z.string().min(6, { message: "Confirm password must be at least 6 characters" }),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Password does not match",
@@ -29,13 +23,6 @@ const initalFormPassword = {
   confirmPassword: "",
 };
 
-const initUser = {
-  id: "",
-  email: "",
-  name: "",
-  accessToken: "",
-  status: 0,
-};
 const PasswordForm = () => {
   const formPassword = useForm({
     mode: "onSubmit",
@@ -43,34 +30,18 @@ const PasswordForm = () => {
     resolver: zodResolver(formChangePWSchema),
   });
 
-  type LocalUser = {
-    id: string;
-    email: string;
-    name: string;
-    accessToken: string;
-    status: number;
-  };
-
-  const handleSubmitChangePW = async (
-    values: z.infer<typeof formChangePWSchema>
-  ) => {
+  const handleSubmitChangePW = async (values: z.infer<typeof formChangePWSchema>) => {
     const _localUser = await getLocalUser();
     if (!_localUser?.id) {
-      addToast({
-        title: "Fail",
-        description: "Can not find your user",
-        color: "danger",
-      });
+      toast.danger("Fail", { description: "Can not find your user" });
+      return;
     }
     const res = await updatePassword(values.newPassword, _localUser?.id);
     if (res.status === 200) {
-      addToast({
-        title: "Success",
-        description: "Password updated successfully",
-        color: "success",
-      });
+      toast.success("Success", { description: "Password updated successfully" });
     }
   };
+
   return (
     <div>
       <form
@@ -81,37 +52,25 @@ const PasswordForm = () => {
         <Controller
           name="newPassword"
           control={formPassword.control}
-          render={({ field }) => (
-            <Input
-              isRequired
-              label="New Password"
-              type="password"
-              placeholder="Enter your new password"
-              className="w-full"
-              {...field}
-            />
+          render={({ field, fieldState }) => (
+            <TextField isRequired type="password" isInvalid={!!fieldState.error} className="w-full" {...field}>
+              <Label>New Password</Label>
+              <Input placeholder="Enter your new password" />
+            </TextField>
           )}
         />
         <Controller
           name="confirmPassword"
           control={formPassword.control}
-          render={({ field }) => (
-            <Input
-              isRequired
-              label="Confirm Password"
-              type="password"
-              placeholder="Confirm your password"
-              className="w-full"
-              {...field}
-            />
+          render={({ field, fieldState }) => (
+            <TextField isRequired type="password" isInvalid={!!fieldState.error} className="w-full" {...field}>
+              <Label>Confirm Password</Label>
+              <Input placeholder="Confirm your password" />
+            </TextField>
           )}
         />
         <div className="flex justify-end w-full">
-          <Button
-            type="submit"
-            variant="light"
-            className="w-full bg-gray-900 text-white"
-          >
+          <Button type="submit" className="w-full bg-gray-900 text-white">
             Save
           </Button>
         </div>

@@ -1,7 +1,6 @@
 "use client";
 import { formatCurrency } from "@/utils/common.util";
-import { Input } from "@heroui/input";
-import { Card, CardBody } from "@heroui/card";
+import { TextField, Label, Input } from "@heroui/react";
 import { useFormContext, Controller } from "react-hook-form";
 
 const PricingSection = () => {
@@ -16,40 +15,26 @@ const PricingSection = () => {
           name="price"
           control={control}
           render={({ field }) => (
-            <Input
-              isRequired
-              label="Sell price"
-              type="text"
-              placeholder="Enter product sell price"
-              className="w-full"
-              size="sm"
-              {...field}
-              value={formatCurrency(field.value)}
-              onChange={(e) => {
-                const value = e.target.value.replace(/[^0-9]/g, "");
-                field.onChange(isNaN(Number(value)) ? 0 : Number(value));
-              }}
-            />
+            <TextField isRequired type="text" className="w-full" value={formatCurrency(field.value)} onChange={(v) => {
+              const value = v.replace(/[^0-9]/g, "");
+              field.onChange(isNaN(Number(value)) ? 0 : Number(value));
+            }}>
+              <Label>Sell price</Label>
+              <Input placeholder="Enter product sell price" />
+            </TextField>
           )}
         />
         <Controller
           name="importPrice"
           control={control}
           render={({ field }) => (
-            <Input
-              isRequired
-              label="Import price"
-              type="text"
-              placeholder="Enter product import price"
-              className="w-full"
-              size="sm"
-              {...field}
-              value={formatCurrency(field.value)}
-              onChange={(e) => {
-                const value = e.target.value.replace(/[^0-9]/g, "");
-                field.onChange(isNaN(Number(value)) ? 0 : Number(value));
-              }}
-            />
+            <TextField isRequired type="text" className="w-full" value={formatCurrency(field.value)} onChange={(v) => {
+              const value = v.replace(/[^0-9]/g, "");
+              field.onChange(isNaN(Number(value)) ? 0 : Number(value));
+            }}>
+              <Label>Import price</Label>
+              <Input placeholder="Enter product import price" />
+            </TextField>
           )}
         />
       </div>

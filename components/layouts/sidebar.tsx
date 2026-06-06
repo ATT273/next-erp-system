@@ -8,13 +8,7 @@ import { User as UserIcon } from "@/components/icons/user";
 import { Logout } from "@/components/icons/logout";
 import { useEffect, useState } from "react";
 import { MENU } from "@/constants";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-} from "@heroui/dropdown";
-import { Button } from "@heroui/button";
+import { Dropdown, Button, Label } from "@heroui/react";
 
 const menus = MENU;
 
@@ -38,27 +32,25 @@ const Sidebar = () => {
       <div className="w-full flex justify-between items-center">
         <UserControlPanel user={localUser} />
         <Dropdown>
-          <DropdownTrigger>
-            <Button isIconOnly variant="light" className="hover:bg-transparent">
-              <CogIcon className="size-7 hover:animate-[spin_2s]" />
-            </Button>
-          </DropdownTrigger>
-          <DropdownMenu aria-label="Static Actions">
-            <DropdownItem
-              href="/profile"
-              key="profile"
-              startContent={<UserIcon className="size-7" />}
-            >
-              <p className="font-semibold">Profile</p>
-            </DropdownItem>
-            <DropdownItem
-              key="logout"
-              onClick={() => logOut()}
-              startContent={<Logout className="size-7" />}
-            >
-              <p className="font-semibold">Logout</p>
-            </DropdownItem>
-          </DropdownMenu>
+          <Button isIconOnly variant="ghost" className="hover:bg-transparent">
+            <CogIcon className="size-7 hover:animate-[spin_2s]" />
+          </Button>
+          <Dropdown.Popover>
+            <Dropdown.Menu aria-label="Static Actions">
+              <Dropdown.Item id="profile" textValue="Profile" href="/profile">
+                <UserIcon className="size-7" />
+                <Label>Profile</Label>
+              </Dropdown.Item>
+              <Dropdown.Item
+                id="logout"
+                textValue="Logout"
+                onPress={() => logOut()}
+              >
+                <Logout className="size-7" />
+                <Label>Logout</Label>
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown.Popover>
         </Dropdown>
       </div>
     </div>

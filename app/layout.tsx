@@ -28,23 +28,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getSession();
-
   return (
     <html suppressHydrationWarning lang="en" className="light">
       <body className={clsx("min-h-screen text-foreground bg-background font-sans antialiased", fontSans.variable)}>
-        <HeroProviders
-          themeProps={{
-            themes: ["light", "dark"],
-            defaultTheme: "light",
-            attribute: "class",
-            enableSystem: false,
-            disableTransitionOnChange: true,
-          }}
-        >
-          <AuthProvider initialSession={session}>
-            <SocketProvider>{children}</SocketProvider>
-          </AuthProvider>
-        </HeroProviders>
+        <AuthProvider initialSession={session}>
+          <SocketProvider>{children}</SocketProvider>
+        </AuthProvider>
       </body>
     </html>
   );

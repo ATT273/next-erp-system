@@ -1,9 +1,10 @@
 "use client";
-import { Accordion, AccordionItem, Divider } from "@heroui/react";
+import { Accordion, Divider } from "@heroui/react";
 import { Lock } from "@/components/icons/lock";
 import PasswordForm from "./PasswordForm";
 import InforForm from "./InforForm";
 import { useAuth } from "../../_providers/authProvider";
+
 const PageContent = () => {
   const { authSession } = useAuth();
 
@@ -15,15 +16,21 @@ const PageContent = () => {
         <div>
           <InforForm />
           <Divider />
-          <Accordion defaultValue="">
-            <AccordionItem
-              key="password"
-              aria-label="Password"
-              startContent={<Lock className="size-6" />}
-              title="Change Password"
-            >
-              <PasswordForm />
-            </AccordionItem>
+          <Accordion>
+            <Accordion.Item id="password">
+              <Accordion.Heading>
+                <Accordion.Trigger>
+                  <Lock className="size-6" />
+                  Change Password
+                  <Accordion.Indicator />
+                </Accordion.Trigger>
+              </Accordion.Heading>
+              <Accordion.Panel>
+                <Accordion.Body>
+                  <PasswordForm />
+                </Accordion.Body>
+              </Accordion.Panel>
+            </Accordion.Item>
           </Accordion>
         </div>
       </div>

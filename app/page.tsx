@@ -1,23 +1,15 @@
-import { Link, Button } from "@heroui/react";
 import { getSession } from "@/app/actions";
+import HomePageAction from "./(app)/_components/HomePageAction";
 
 export default async function Home() {
   const session = await getSession();
 
   return (
-    <div className="w-dvw h-dvh items-center relative">
-      <div className="absolute top-1/2 -translate-y-1/2 w-full">
-        <h1 className="font-bold text-3xl text-center mb-3">Welcome to Next CRM, {session ? session.name : "Guest"}</h1>
-        <div className="w-full flex justify-center">
-          {session && session.id ? (
-            <Button as={Link} color="primary" href="dashboard" variant="solid">
-              Go to dashboard
-            </Button>
-          ) : (
-            <Button as={Link} color="primary" href="authenticate" variant="solid">
-              Login
-            </Button>
-          )}
+    <div className="relative items-center w-dvw h-dvh">
+      <div className="absolute w-full -translate-y-1/2 top-1/2">
+        <h1 className="mb-3 text-3xl font-bold text-center">Welcome to Next CRM, {session ? session.name : "Guest"}</h1>
+        <div className="flex justify-center w-full">
+          <HomePageAction session={session} />
         </div>
       </div>
     </div>

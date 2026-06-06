@@ -1,16 +1,10 @@
 import React, { useState } from "react";
-import { Button } from "@heroui/button";
+import { Button, TextField, Label, Input } from "@heroui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { logIn } from "../actions";
 import { useForm, Controller } from "react-hook-form";
-import { Input } from "@heroui/input";
-
-type Inputs = {
-  example: string;
-  exampleRequired: string;
-};
 
 export type FormData = {
   email: string;
@@ -58,22 +52,33 @@ const LogInForm = () => {
         <Controller
           name="email"
           control={form.control}
-          render={({ field }) => (
-            <Input isRequired label="Email" placeholder="your@email.com" {...field} className="w-full text-gray-900" />
+          render={({ field, fieldState }) => (
+            <TextField
+              isRequired
+              type="email"
+              isInvalid={!!fieldState.error}
+              className="w-full"
+              {...field}
+            >
+              <Label>Email</Label>
+              <Input placeholder="your@email.com" className="text-gray-900" />
+            </TextField>
           )}
         />
         <Controller
           name="password"
           control={form.control}
-          render={({ field }) => (
-            <Input
+          render={({ field, fieldState }) => (
+            <TextField
               isRequired
-              label="Password"
               type="password"
-              placeholder="Enter your password"
+              isInvalid={!!fieldState.error}
               className="w-full"
               {...field}
-            />
+            >
+              <Label>Password</Label>
+              <Input placeholder="Enter your password" />
+            </TextField>
           )}
         />
         <p className="text-red-500">{error}</p>

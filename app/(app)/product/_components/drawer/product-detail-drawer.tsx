@@ -5,17 +5,17 @@ import { ClientImage, IProductForm, IProductPayload, IProductSku, ProductRespons
 import useToast from "../../../_hooks/use-toast";
 import ProductForm from "../forms/product-form";
 import { useProductStore } from "../../_store/product-store";
-import { Drawer, DrawerContent } from "@heroui/drawer";
+import { Drawer, useOverlayState } from "@heroui/react";
 import { useUploadFiles } from "../../_hooks/use-upload-file";
+import { useEffect } from "react";
 
 const EditProduct = ({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) => {
   const { toast } = useToast();
   const { setSelectedId, selectedProductId, setProductDetails } = useProductStore();
   const { uploading, uploadFiles } = useUploadFiles();
+  const state = useOverlayState({ isOpen: open, onOpenChange: setOpen });
 
-  const handleSubmit: SubmitHandler<IProductForm & { skuItems: IProductSku[]; files: ClientImage[] }> = async (
-    values: IProductForm & { skuItems: IProductSku[]; files: ClientImage[] }
-  ) => {
+  const handleSubmit: SubmitHandler<IProductForm & { skuItems: IProductSku[]; files: ClientImage[] }> = async (values) => {
     const { skuItems, files, ...data } = values;
     const _data: IProductPayload = {
       ...data,
@@ -33,38 +33,34 @@ const EditProduct = ({ open, setOpen }: { open: boolean; setOpen: (open: boolean
       const uploadResults = await uploadFiles(needToUpload);
       _data.images = [..._data.images, ...uploadResults];
     }
-
     const result = await updateProduct(selectedProductId, _data);
     if (result.status === 200) {
-      toast.success({
-        title: "Success",
-        message: "Product created successfully",
-      });
+      toast.success({ title: "Success", message: "Product updated successfully" });
       setOpen(false);
     } else {
-      toast.error({
-        title: "Fail",
-        message: `Failed to create SKU: ${result.message}`,
-      });
+      toast.error({ title: "Fail", message: `Failed to update product: ${result.message}` });
     }
   };
 
-  const onOpenChange = (open: boolean) => {
-    if (!open) {
-      setSelectedId("");
-      setProductDetails({} as ProductResponseType);
-    }
-    setOpen(open);
+  const handleClose = () => {
+    setSelectedId("");
+    setProductDetails({} as ProductResponseType);
+    setOpen(false);
   };
 
   return (
-    <div>
-      <Drawer isOpen={open} onOpenChange={onOpenChange} size="xl" isDismissable={false}>
-        <DrawerContent className="">
-          {(onClose) => <ProductForm closeDrawer={setOpen} handleSubmit={handleSubmit} />}
-        </DrawerContent>
-      </Drawer>
-    </div>
+    <Drawer state={state}>
+      <Drawer.Backdrop isDismissable={false}>
+        <Drawer.Content placement="right">
+          <Drawer.Dialog>
+            <Drawer.CloseTrigger onPress={handleClose} />
+            <Drawer.Body>
+              <ProductForm closeDrawer={handleClose} handleSubmit={handleSubmit} />
+            </Drawer.Body>
+          </Drawer.Dialog>
+        </Drawer.Content>
+      </Drawer.Backdrop>
+    </Drawer>
   );
 };
 
