@@ -1,142 +1,110 @@
-import { PERMISSION_VALUE } from "@/constants/rbac.constants";
-import { PermissionKey, Resource, Permissions } from "@/types/auth.types";
+import { ACTION_VALUE } from "@/constants/rbac.constants";
+import { Resource, Action, ResourcePermission } from "@/types/auth.types";
 
 /**
  * Check if user has a specific permission for a resource
- * @param userPermissions - User's permissions object (e.g., {dashboard: 7, product: 7, user: 15, role: 7})
+ * @param userPermissions - User's permissions object (e.g., {product: ["view", "edit"], user: ["view", "assign"]})
  * @param resource - The resource to check (dashboard, product, user, role)
- * @param permission - The permission to check (ACCESS, EDIT, DELETE, ASSIGN)
+ * @param permission - The permission to check (access, view, create, edit, delete, assign)
  * @returns boolean indicating if user has the permission
  */
-export function hasPermission(userPermissions: Permissions, resource: Resource, permission: PermissionKey): boolean {
-  const resourcePermission = userPermissions[resource] ?? 0;
-  const permissionValue = PERMISSION_VALUE[permission];
-  return (resourcePermission & permissionValue) === permissionValue;
+export function hasPermission(userPermissions: ResourcePermission, resource: Resource, permission: Action): boolean {
+  const resourcePermission = userPermissions[resource];
+  if (!resourcePermission) return false;
+  return resourcePermission.includes(permission);
 }
 
 /**
- * Check if user has access permission for a resource
+ * Check if user has view permission for a resource
  */
-export function canAccess(userPermissions: Permissions, resource: Resource): boolean {
-  return hasPermission(userPermissions, resource, "ACCESS");
+export function canAccess(userPermissions: ResourcePermission, resource: Resource): boolean {
+  return hasPermission(userPermissions, resource, ACTION_VALUE.VIEW);
 }
 
 /**
  * Check if user has edit permission for a resource
  */
-export function canEdit(userPermissions: Permissions, resource: Resource): boolean {
-  return hasPermission(userPermissions, resource, "EDIT");
+export function canEdit(userPermissions: ResourcePermission, resource: Resource): boolean {
+  return hasPermission(userPermissions, resource, ACTION_VALUE.EDIT);
 }
 
 /**
  * Check if user has delete permission for a resource
  */
-export function canDelete(userPermissions: Permissions, resource: Resource): boolean {
-  return hasPermission(userPermissions, resource, "DELETE");
+export function canDelete(userPermissions: ResourcePermission, resource: Resource): boolean {
+  return hasPermission(userPermissions, resource, ACTION_VALUE.DELETE);
 }
 
 /**
  * Check if user has assign permission for a resource
  */
-export function canAssign(userPermissions: Permissions, resource: Resource): boolean {
-  return hasPermission(userPermissions, resource, "ASSIGN");
+export function canAssign(userPermissions: ResourcePermission, resource: Resource): boolean {
+  return hasPermission(userPermissions, resource, ACTION_VALUE.ASSIGN);
 }
 
-/**
- * Check if user has multiple permissions for a resource
- * @param userPermissions - User's permissions object
- * @param resource - The resource to check
- * @param permissions - Array of permissions to check
- * @returns boolean indicating if user has ALL the specified permissions
- */
-export function hasAllPermissions(
-  userPermissions: Permissions,
-  resource: Resource,
-  permissions: PermissionKey[],
-): boolean {
-  return permissions.every((permission) => hasPermission(userPermissions, resource, permission));
-}
+// export function hasAllPermissions(
+//   userPermissions: ResourcePermission,
+//   resource: Resource,
+//   permissions: PermissionKey[],
+// ): boolean {
+//   return permissions.every((permission) => hasPermission(userPermissions, resource, permission));
+// }
 
-/**
- * Check if user has at least one of the specified permissions for a resource
- * @param userPermissions - User's permissions object
- * @param resource - The resource to check
- * @param permissions - Array of permissions to check
- * @returns boolean indicating if user has ANY of the specified permissions
- */
-export function hasAnyPermission(
-  userPermissions: Permissions,
-  resource: Resource,
-  permissions: PermissionKey[],
-): boolean {
-  return permissions.some((permission) => hasPermission(userPermissions, resource, permission));
-}
+// export function hasAnyPermission(
+//   userPermissions: ResourcePermission,
+//   resource: Resource,
+//   permissions: PermissionKey[],
+// ): boolean {
+//   return permissions.some((permission) => hasPermission(userPermissions, resource, permission));
+// }
 
 /**
  * Get all permissions a user has for a specific resource
  * @param userPermissions - User's permissions object
  * @param resource - The resource to check
- * @returns Array of permission keys that the user has
+ * @returns Array of actions the user has for the resource, or undefined if none
  */
-export function getResourcePermissions(userPermissions: Permissions, resource: Resource): PermissionKey[] {
-  const permissions: PermissionKey[] = [];
-  const permissionKeys = Object.keys(PERMISSION_VALUE) as PermissionKey[];
-
-  for (const permission of permissionKeys) {
-    if (hasPermission(userPermissions, resource, permission)) {
-      permissions.push(permission);
-    }
-  }
-
-  return permissions;
+export function getResourcePermissions(userPermissions: ResourcePermission, resource: Resource): Action[] | undefined {
+  return userPermissions[resource];
 }
 
 /**
- * Add a permission to a resource permission value
- * @param currentPermission - Current permission value for the resource
- * @param permission - Permission to add
- * @returns New permission value
+ * Add a permission to a resource's permission list (no-op if already present)
+ * @param userPermission - User's permissions object
+ * @param resource - The resource to update
+ * @param action - The action to add
+ * @returns New permissions object with the action added
  */
-export function addPermission(currentPermission: number, permission: PermissionKey): number {
-  return currentPermission | PERMISSION_VALUE[permission];
+export function addPermission(resourcePermission: Action[], action: Action): Action[] {
+  const alreadyHasPermission = resourcePermission.includes(action);
+  if (alreadyHasPermission) return resourcePermission;
+
+  resourcePermission.push(action);
+  return resourcePermission;
 }
 
 /**
- * Remove a permission from a resource permission value
- * @param currentPermission - Current permission value for the resource
- * @param permission - Permission to remove
- * @returns New permission value
+ * Remove a permission from a resource's permission list (no-op if not present)
+ * @param userPermission - User's permissions object
+ * @param resource - The resource to update
+ * @param action - The action to remove
+ * @returns New permissions object with the action removed
  */
-export function removePermission(currentPermission: number, permission: PermissionKey): number {
-  return currentPermission & ~PERMISSION_VALUE[permission];
+export function removePermission(resourcePermission: Action[], action: Action): Action[] {
+  const alreadyHasPermission = resourcePermission.includes(action);
+  if (!alreadyHasPermission) return resourcePermission;
+  return resourcePermission.filter((p) => p !== action);
 }
 
-/**
- * Toggle a permission for a resource permission value
- * @param currentPermission - Current permission value for the resource
- * @param permission - Permission to toggle
- * @returns New permission value
- */
-export function togglePermission(currentPermission: number, permission: PermissionKey): number {
-  return currentPermission ^ PERMISSION_VALUE[permission];
-}
+// export function togglePermission(currentPermission: number, permission: PermissionKey): number {
+//   return currentPermission ^ PERMISSION_VALUE[permission];
+// }
 
-/**
- * Create a permission value from an array of permissions
- * @param permissions - Array of permissions to combine
- * @returns Combined permission value
- */
-export function createPermissionValue(permissions: PermissionKey[]): number {
-  return permissions.reduce((acc, permission) => acc | PERMISSION_VALUE[permission], 0);
-}
+// export function createPermissionValue(permissions: PermissionKey[]): number {
+//   return permissions.reduce((acc, permission) => acc | PERMISSION_VALUE[permission], 0);
+// }
 
-/**
- * Check if a permission value includes a specific permission
- * @param permissionValue - The permission value to check
- * @param permission - The permission to check for
- * @returns boolean indicating if the permission is included
- */
-export function includesPermission(permissionValue: number, permission: PermissionKey): boolean {
-  const permValue = PERMISSION_VALUE[permission];
-  return (permissionValue & permValue) === permValue;
-}
+// export function includesPermission(permissionValue: number, permission: PermissionKey): boolean {
+//   const permValue = PERMISSION_VALUE[permission];
+//   return (permissionValue & permValue) === permValue;
+// }

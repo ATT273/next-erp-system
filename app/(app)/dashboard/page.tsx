@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/app/actions";
-import Forbidden from "@/components/pages/forbiden";
+import Forbidden from "@/components/pages/forbidden";
 import { getSummary } from "./actions";
 
 import DashboardContainer from "./components/dashboard-container";
@@ -17,12 +17,12 @@ const Dashboard = async () => {
       return <Forbidden />;
     }
   }
-  const summary = await getSummary();
+  // const summary = await getSummary();
 
   return (
-    <div className="flex flex-col h-full gap-4 p-3 relative">
-      <h1 className="font-bold text-2xl">Dashboard</h1>
-      <DashboardContainer summary={summary?.data} />
+    <div className="relative flex flex-col h-full gap-4 p-3">
+      <h1 className="text-2xl font-bold">Dashboard</h1>
+      {/* <DashboardContainer summary={summary?.data} /> */}
     </div>
   );
 };

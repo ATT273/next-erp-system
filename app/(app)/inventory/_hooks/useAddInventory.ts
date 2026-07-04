@@ -1,14 +1,14 @@
-import { INewInventoryForm } from "@/types/inventory.type";
+import { ICreateInventoryRequest } from "@/types/requests/inventory.request";
 import { useMutation } from "@tanstack/react-query";
 import { createInventory } from "../actions";
 
-interface IUseUpdateInventoryProps {
+interface IUseAddInventoryProps {
   onSuccess?: () => void;
   onError?: () => void;
 }
-export const useAddInventory = ({ onSuccess, onError }: IUseUpdateInventoryProps = {}) => {
+export const useAddInventory = ({ onSuccess, onError }: IUseAddInventoryProps = {}) => {
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: async ({ data }: { data: INewInventoryForm }) => {
+    mutationFn: async ({ data }: { data: ICreateInventoryRequest }) => {
       const result = await createInventory(data);
       return result;
     },

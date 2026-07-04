@@ -1,34 +1,20 @@
-import { addToast } from "@heroui/toast";
+import { toast } from "@heroui/react";
 
 interface Props {
   title: string;
   message: string;
-  position?:
-    | "top-center"
-    | "top-right"
-    | "top-left"
-    | "bottom-center"
-    | "bottom-right"
-    | "bottom-left";
 }
+
 function useToast() {
-  const toast = {
+  const _toast = {
     success: ({ title, message }: Props) => {
-      addToast({
-        title,
-        description: message,
-        color: "success",
-      });
+      toast.success(title, { description: message });
     },
     error: ({ title, message }: Props) => {
-      addToast({
-        title,
-        description: message,
-        color: "danger",
-      });
+      toast.danger(title, { description: message });
     },
   };
-  return { toast };
+  return { toast: _toast };
 }
 
 export default useToast;

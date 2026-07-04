@@ -3,98 +3,77 @@
 import { z } from "zod";
 import { updateInfo } from "../actions";
 import { useEffect } from "react";
-import { getLocalUser } from "@/utils/session";
 import { getUserDetails } from "@/app/(app)/user/actions";
-import { Form, Input, Button, DatePicker, CalendarDate } from "@heroui/react";
+import { TextField, Label, Input, Button, DatePicker } from "@heroui/react";
 import { Controller, useForm } from "react-hook-form";
 import { parseDate } from "@internationalized/date";
-import { addToast } from "@heroui/toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { I18nProvider } from "@react-aria/i18n";
+import { useAuth } from "@/app/(app)/_providers/authProvider";
+import useToast from "@/app/(app)/_hooks/use-toast";
 
 const formInfoSchema = z.object({
-  id: z.string(),
-  email: z.string().email({
-    message: "Invalid email address",
-  }),
-  name: z.string().min(6, {
-    message: "Name must be at least 6 characters",
-  }),
+  email: z.string().email({ message: "Invalid email address" }),
+  name: z.string().min(6, { message: "Name must be at least 6 characters" }),
   dob: z.string(),
 });
 
 const InforForm = () => {
+  const { authSession } = useAuth();
+  const { toast } = useToast();
+
   const formInfo = useForm({
-    defaultValues: {
-      id: "",
-      email: "",
-      name: "",
-      dob: "",
-    },
+    defaultValues: { email: "", name: "", dob: "" },
     mode: "onChange",
     resolver: zodResolver(formInfoSchema),
   });
-  useEffect(() => {
-    const _localUser = getLocalUser();
-    if (_localUser.data.id) {
-      getDetail(_localUser.data.id);
-    }
-  }, []);
 
-  const getDetail = async (id: string) => {
-    const res = await getUserDetails(id);
-    if (res.status === 200) {
-      formInfo.reset({
-        id: res.data.id,
-        email: res.data.email,
-        name: res.data.name,
-        dob: res.data.dob,
-      });
-    }
-  };
+  useEffect(() => {
+    if (!authSession?.id) return;
+    getUserDetails(authSession.id).then((res) => {
+      if (res.status === 200 && res.data != null) {
+        const { email, name, dob } = res.data;
+        formInfo.reset({ email, name, dob });
+      }
+    });
+  }, [authSession?.id]);
+
   const onSubmit = async (values: z.infer<typeof formInfoSchema>) => {
-    const res = await updateInfo(values.email, values.name, values.dob, values.id);
+    if (!authSession?.id) return;
+    const res = await updateInfo(authSession.id, { name: values.name, dob: values.dob });
     if (res.status === 200) {
-      addToast({
-        title: "Success",
-        description: "Info updated successfully",
-        color: "success",
-      });
+      toast.success({ title: "Success", message: "Info updated successfully" });
+    } else {
+      toast.error({ title: "Fail", message: res.message });
     }
   };
+
   return (
     <div className="mb-3">
-      <h2 className="text-gray-800 text-xl font-semibold">General Information</h2>
-      <Form className="w-full max-w-xs flex flex-col gap-4" onSubmit={formInfo.handleSubmit(onSubmit)}>
+      <h2 className="text-gray-800 text-xl font-semibold dark:text-gray-200">General Information</h2>
+      <form
+        id="infoForm"
+        onSubmit={formInfo.handleSubmit(onSubmit)}
+        className="w-full max-w-xs flex flex-col gap-4 mt-3"
+      >
         <Controller
           name="email"
           control={formInfo.control}
-          render={({ field }) => (
-            <Input
-              isRequired
-              label="Email"
-              type="email"
-              placeholder="your@email.com"
-              className="w-full"
-              value={field.value}
-              name={field.name}
-              onChange={field.onChange}
-            />
+          render={({ field, fieldState }) => (
+            <TextField isRequired type="email" isInvalid={!!fieldState.error} isDisabled className="w-full" {...field}>
+              <Label>Email</Label>
+              <Input placeholder="your@email.com" />
+            </TextField>
           )}
         />
         <Controller
           name="name"
           control={formInfo.control}
-          render={({ field }) => (
-            <Input
-              isRequired
-              label="Name"
-              type="text"
-              placeholder="Enter your name"
-              value={field.value}
-              name={field.name}
-              onChange={field.onChange}
-            />
+          render={({ field, fieldState }) => (
+            <TextField isRequired type="text" isInvalid={!!fieldState.error} className="w-full" {...field}>
+              <Label>Name</Label>
+              <Input placeholder="Enter your name" />
+            </TextField>
           )}
         />
         <Controller
@@ -104,19 +83,18 @@ const InforForm = () => {
             <I18nProvider locale="en-GB">
               <DatePicker
                 className="w-full"
-                label="Date of Birth"
-                value={field.value ? (parseDate(field.value) as unknown as CalendarDate) : null}
-                onChange={field.onChange}
-              />
+                value={field.value ? (parseDate(field.value) as any) : null}
+                onChange={(v) => v && field.onChange(v.toString())}
+              >
+                <Label>Date of Birth</Label>
+              </DatePicker>
             </I18nProvider>
           )}
         />
-        <div className="flex justify-end w-full">
-          <Button type="submit" variant="light" className="w-full bg-gray-900 text-white">
-            Save
-          </Button>
-        </div>
-      </Form>
+        <Button type="submit" className="w-full bg-gray-900 text-white">
+          Save
+        </Button>
+      </form>
     </div>
   );
 };

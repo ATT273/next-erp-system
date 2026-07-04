@@ -1,0 +1,98 @@
+import { IProductFormValues } from "@/app/(app)/product/_types/product.schema";
+import { ICursorResponseMeta, IResponseMeta } from "../response.types";
+
+// RESPONSE TYPE FROM API
+export type ProductType = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  mainCategory: number;
+  subCategory: number;
+  unit: string;
+  qty: number;
+  sizes: string[];
+  importPrice: number;
+  skus: IProductSku[];
+  images: IProductImage[];
+};
+
+export type ProductDataResponseType = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  mainCategory: number;
+  subCategory: number;
+  unit: string;
+  qty: number;
+  sizes: string[];
+  importPrice: number;
+  skus: IProductSku[];
+  images: IProductImageResponse[];
+};
+
+export interface IProductResponse {
+  data: ProductType[];
+  meta: IResponseMeta | null;
+  success: boolean;
+  message: string;
+}
+
+export interface IProductInfiniteSearchResponse {
+  data: ProductType[];
+  meta: ICursorResponseMeta | null;
+  success: boolean;
+  message: string;
+}
+
+// PAYLOAD TYPE FOR CREATING/UPDATING PRODUCT
+export type CreateProductType = {
+  name: string;
+  description: string;
+  price: number;
+  mainCategory: number;
+  subCategory: number;
+  unit: string;
+  qty: number;
+  sizes: string[];
+  importPrice: number;
+};
+
+export interface IProductSku {
+  id: string;
+  sku: string;
+  size: string;
+  qty: number;
+  price: number;
+  images: IProductSKUImage[];
+}
+export interface IProductImage {
+  url: string;
+  id?: number;
+  name: string;
+}
+
+export interface IProductImageResponse {
+  url: string;
+  id: number;
+  name: string;
+}
+
+export interface IProductSKUImage {
+  url: string;
+  id?: string;
+  name: string;
+  productImageId: number;
+}
+
+export type ClientImage = {
+  id?: number;
+  file?: File;
+  url: string;
+  name: string;
+};
+
+export interface IProductPayload extends IProductFormValues {
+  images: IProductImage[];
+}

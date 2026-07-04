@@ -1,17 +1,29 @@
 "use server";
 import { ISession } from "@/types/auth.types";
-import { cookies } from "next/headers";
+import { createClient } from "@/libs/supabase/server";
+import { prisma } from "@/libs/prisma";
 
 export const getSession = async (): Promise<ISession | null> => {
-  const cookieStore = await cookies();
-  if (cookieStore) {
-    const session = cookieStore.get("session");
-    if (session) {
-      if (!session.value) return null;
-      return JSON.parse(session.value);
-    }
-    return null;
-  } else {
-    return null;
-  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const profile = await prisma.profile.findUnique({
+    where: { id: user.id },
+    include: { role: true },
+  });
+
+  if (!profile) return null;
+
+  return {
+    id: profile.id,
+    email: profile.email,
+    name: profile.name,
+    roleCode: profile.roleCode,
+    roleActive: profile.role.active,
+    permissions: profile.role.permissions as ISession["permissions"],
+  };
 };

@@ -2,121 +2,73 @@
 
 import { z } from "zod";
 import { updatePassword } from "../actions";
-import { getLocalUser } from "@/utils/session";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@heroui/input";
-import { Button } from "@heroui/button";
-import { addToast } from "@heroui/toast";
+import { TextField, Label, Input, Button } from "@heroui/react";
+import { useAuth } from "@/app/(app)/_providers/authProvider";
+import useToast from "@/app/(app)/_hooks/use-toast";
 
-const formChangePWSchema = z
+const formSchema = z
   .object({
-    newPassword: z.string().min(6, {
-      message: "New password must be at least 6 characters",
-    }),
-    confirmPassword: z.string().min(6, {
-      message: "Confirm password must be at least 6 characters",
-    }),
+    newPassword: z.string().min(6, { message: "New password must be at least 6 characters" }),
+    confirmPassword: z.string().min(6, { message: "Confirm password must be at least 6 characters" }),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Password does not match",
     path: ["confirmPassword"],
   });
 
-const initalFormPassword = {
-  currentPassword: "",
-  newPassword: "",
-  confirmPassword: "",
-};
-
-const initUser = {
-  id: "",
-  email: "",
-  name: "",
-  accessToken: "",
-  status: 0,
-};
 const PasswordForm = () => {
-  const formPassword = useForm({
+  const { authSession } = useAuth();
+  const { toast } = useToast();
+
+  const form = useForm({
     mode: "onSubmit",
-    defaultValues: initalFormPassword,
-    resolver: zodResolver(formChangePWSchema),
+    defaultValues: { newPassword: "", confirmPassword: "" },
+    resolver: zodResolver(formSchema),
   });
 
-  type LocalUser = {
-    id: string;
-    email: string;
-    name: string;
-    accessToken: string;
-    status: number;
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!authSession?.id) return;
+    const res = await updatePassword(authSession.id, values.newPassword);
+    if (res.status === 200) {
+      toast.success({ title: "Success", message: "Password updated successfully" });
+      form.reset();
+    } else {
+      toast.error({ title: "Fail", message: res.message });
+    }
   };
 
-  const handleSubmitChangePW = async (
-    values: z.infer<typeof formChangePWSchema>
-  ) => {
-    const _localUser = await getLocalUser();
-    if (!_localUser?.id) {
-      addToast({
-        title: "Fail",
-        description: "Can not find your user",
-        color: "danger",
-      });
-    }
-    const res = await updatePassword(values.newPassword, _localUser?.id);
-    if (res.status === 200) {
-      addToast({
-        title: "Success",
-        description: "Password updated successfully",
-        color: "success",
-      });
-    }
-  };
   return (
-    <div>
-      <form
-        key="passwordForm"
-        onSubmit={formPassword.handleSubmit(handleSubmitChangePW)}
-        className="flex flex-col gap-3 p-3 items-center"
-      >
-        <Controller
-          name="newPassword"
-          control={formPassword.control}
-          render={({ field }) => (
-            <Input
-              isRequired
-              label="New Password"
-              type="password"
-              placeholder="Enter your new password"
-              className="w-full"
-              {...field}
-            />
-          )}
-        />
-        <Controller
-          name="confirmPassword"
-          control={formPassword.control}
-          render={({ field }) => (
-            <Input
-              isRequired
-              label="Confirm Password"
-              type="password"
-              placeholder="Confirm your password"
-              className="w-full"
-              {...field}
-            />
-          )}
-        />
-        <div className="flex justify-end w-full">
-          <Button
-            type="submit"
-            variant="light"
-            className="w-full bg-gray-900 text-white"
-          >
-            Save
-          </Button>
-        </div>
-      </form>
-    </div>
+    <form
+      id="passwordForm"
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="flex flex-col gap-3 p-3 items-center"
+    >
+      <Controller
+        name="newPassword"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <TextField isRequired type="password" isInvalid={!!fieldState.error} className="w-full" {...field}>
+            <Label>New Password</Label>
+            <Input placeholder="Enter your new password" />
+          </TextField>
+        )}
+      />
+      <Controller
+        name="confirmPassword"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <TextField isRequired type="password" isInvalid={!!fieldState.error} className="w-full" {...field}>
+            <Label>Confirm Password</Label>
+            <Input placeholder="Confirm your password" />
+          </TextField>
+        )}
+      />
+      <Button type="submit" className="w-full bg-gray-900 text-white">
+        Save
+      </Button>
+    </form>
   );
 };
 

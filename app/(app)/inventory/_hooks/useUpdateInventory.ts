@@ -1,4 +1,4 @@
-import { INewInventoryForm } from "@/types/inventory.type";
+import { ICreateInventoryRequest } from "@/types/requests/inventory.request";
 import { useMutation } from "@tanstack/react-query";
 import { updateInventory } from "../actions";
 
@@ -8,7 +8,7 @@ interface IUseUpdateInventoryProps {
 }
 export const useUpdateInventory = ({ onSuccess, onError }: IUseUpdateInventoryProps = {}) => {
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: INewInventoryForm }) => {
+    mutationFn: async ({ id, data }: { id: string; data: ICreateInventoryRequest }) => {
       const result = await updateInventory(id, data);
       return result;
     },

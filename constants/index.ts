@@ -1,4 +1,5 @@
 import { IMenu } from "@/types/auth.types";
+import { RESOURCE_PERMISSIONS } from "./rbac.constants";
 
 export * from "./environment.constants";
 export * from "./rbac.constants";
@@ -10,35 +11,35 @@ export const MENU: IMenu[] = [
     title: "Dashboard",
     icon: "Dashboard",
     href: "/dashboard",
-    permissions: ["ACCESS", "EDIT", "DELETE"],
+    permissions: RESOURCE_PERMISSIONS.dashboard,
   },
   {
     key: "product",
     title: "Products",
     icon: "Products",
     href: "/product",
-    permissions: ["ACCESS", "EDIT", "DELETE"],
+    permissions: RESOURCE_PERMISSIONS.product,
   },
   {
     key: "inventory",
     title: "Inventory",
     icon: "Inventory",
     href: "/inventory",
-    permissions: ["ACCESS", "EDIT", "DELETE"],
+    permissions: RESOURCE_PERMISSIONS.inventory,
   },
   {
     key: "role",
     title: "Roles",
     icon: "Roles",
     href: "/role",
-    permissions: ["ACCESS", "EDIT", "DELETE"],
+    permissions: RESOURCE_PERMISSIONS.role,
   },
   {
     key: "user",
     title: "Users",
     icon: "Users",
     href: "/user",
-    permissions: ["ACCESS", "EDIT", "DELETE", "ASSIGN"],
+    permissions: RESOURCE_PERMISSIONS.role,
   },
 ];
 

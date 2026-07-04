@@ -1,5 +1,5 @@
 "use client";
-import { ISession, Permissions } from "@/types/auth.types";
+import { ISession } from "@/types/auth.types";
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
 
 interface IAuthContext {

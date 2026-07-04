@@ -1,12 +1,10 @@
 "use client";
 import { useFormContext, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
-import { ClientImage, IProductForm, IProductSku, ProductType } from "@/types/product.type";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import { formInfoSchema } from "../../_types/inventory.schema";
+import { ProductType } from "@/types/product.type";
+import { TextField, Label, Input, Select, ListBox } from "@heroui/react";
+import { formInventorySchema } from "../../_types/inventory.schema";
 import { formatCurrency } from "@/utils/common.util";
 import { useInventoryStore } from "../../_store/inventory-store";
 
@@ -20,104 +18,103 @@ const CHANGE_TYPES = [
   { value: "ADJUSTMENT", label: "Adjustment" },
   { value: "RETURN", label: "Return" },
 ];
+
 const NewInventoryForm = ({ products }: Props) => {
-  const formInfo = useFormContext<z.infer<typeof formInfoSchema>>();
+  const formInfo = useFormContext<z.infer<typeof formInventorySchema>>();
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const inventoryDetails = useInventoryStore((store) => store.inventoryDetails);
-  // form watchers
   const watchedSkuId = formInfo.watch("skuId");
   const watchedQuantityChange = formInfo.watch("qtyChange");
 
-  const productSkus = useMemo(() => {
-    return products.find((item) => item.id === selectedProductId)?.skus || [];
-  }, [selectedProductId]);
-  const selectedSku = useMemo(() => {
-    return productSkus.find((item) => item.id === watchedSkuId) || null;
-  }, [watchedSkuId]);
+  const productSkus = useMemo(
+    () => products.find((item) => item.id === selectedProductId)?.skus || [],
+    [selectedProductId],
+  );
+  const selectedSku = useMemo(() => productSkus.find((item) => item.id === watchedSkuId) || null, [watchedSkuId]);
 
   useEffect(() => {
-    if (inventoryDetails && inventoryDetails.productId) {
-      setSelectedProductId(inventoryDetails.productId);
-    }
+    if (inventoryDetails && inventoryDetails.productId) setSelectedProductId(inventoryDetails.productId);
   }, [inventoryDetails]);
-  const [isValid, setIsValid] = useState<{
-    skuId: boolean;
-    changeType: boolean;
-    qtyChange: boolean;
-    isSubmit: boolean;
-  }>({
-    skuId: true,
-    changeType: true,
-    qtyChange: false,
-    isSubmit: false,
-  });
+
   return (
-    <>
+    <div className="flex flex-col w-full gap-4">
       <Controller
         name="changeType"
         control={formInfo.control}
         render={({ field }) => (
           <Select
             isRequired
-            label="Change Type"
-            size="sm"
-            placeholder="Select Change Type"
-            selectedKeys={field.value ? [field.value] : []}
-            errorMessage={isValid.changeType && isValid.isSubmit ? undefined : "Change Type is required"}
-            isInvalid={!isValid.changeType && isValid.isSubmit}
+            value={field.value}
+            name={field.name}
             onChange={field.onChange}
+            placeholder="Select Change Type"
           >
-            {CHANGE_TYPES.map((item) => (
-              <SelectItem aria-disabled="true" key={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
+            <Label>Change Type</Label>
+            <Select.Trigger>
+              <Select.Value />
+              <Select.Indicator />
+            </Select.Trigger>
+            <Select.Popover>
+              <ListBox>
+                {CHANGE_TYPES.map((item) => (
+                  <ListBox.Item key={item.value} id={item.value} textValue={item.label}>
+                    {item.label}
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                ))}
+              </ListBox>
+            </Select.Popover>
           </Select>
         )}
       />
       <Select
         isRequired
-        label="Product"
-        size="sm"
+        value={selectedProductId ?? ""}
+        onChange={(v) => setSelectedProductId(v as string)}
         placeholder="Select product"
-        selectedKeys={selectedProductId ? [selectedProductId] : []}
-        errorMessage={isValid.skuId && isValid.isSubmit ? undefined : "Product is required"}
-        isInvalid={!isValid.skuId && isValid.isSubmit}
-        onChange={(e) => setSelectedProductId(e.target.value)}
       >
-        {products.map((item) => (
-          <SelectItem aria-disabled="true" key={item.id}>
-            {item.name}
-          </SelectItem>
-        ))}
+        <Label>Product</Label>
+        <Select.Trigger>
+          <Select.Value />
+          <Select.Indicator />
+        </Select.Trigger>
+        <Select.Popover>
+          <ListBox>
+            {products.map((item) => (
+              <ListBox.Item key={item.id} id={item.id} textValue={item.name}>
+                {item.name}
+                <ListBox.ItemIndicator />
+              </ListBox.Item>
+            ))}
+          </ListBox>
+        </Select.Popover>
       </Select>
       <Controller
         name="skuId"
         control={formInfo.control}
         render={({ field }) => (
-          <Select
-            isRequired
-            label="SKU"
-            size="sm"
-            placeholder="Select SKU"
-            selectedKeys={field.value ? [field.value] : []}
-            errorMessage={isValid.skuId && isValid.isSubmit ? undefined : "SKU is required"}
-            isInvalid={!isValid.skuId && isValid.isSubmit}
-            onChange={(e) => {
-              field.onChange(e.target.value);
-            }}
-          >
-            {productSkus.length > 0 ? (
-              productSkus.map((item) => (
-                <SelectItem aria-disabled="true" key={item.id}>
-                  {item.sku}
-                </SelectItem>
-              ))
-            ) : (
-              <SelectItem aria-disabled="true" key="no-sku">
-                No SKU available
-              </SelectItem>
-            )}
+          <Select isRequired value={field.value} name={field.name} onChange={field.onChange} placeholder="Select SKU">
+            <Label>SKU</Label>
+            <Select.Trigger>
+              <Select.Value />
+              <Select.Indicator />
+            </Select.Trigger>
+            <Select.Popover>
+              <ListBox>
+                {productSkus.length > 0 ? (
+                  productSkus.map((item) => (
+                    <ListBox.Item key={item.id} id={item.id} textValue={item.sku}>
+                      {item.sku}
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  ))
+                ) : (
+                  <ListBox.Item key="no-sku" id="no-sku" textValue="No SKU available">
+                    No SKU available
+                  </ListBox.Item>
+                )}
+              </ListBox>
+            </Select.Popover>
           </Select>
         )}
       />
@@ -125,51 +122,49 @@ const NewInventoryForm = ({ products }: Props) => {
         name="note"
         control={formInfo.control}
         render={({ field }) => (
-          <Input
-            label="Note"
-            type="text"
-            placeholder="Enter product note"
-            size="sm"
-            value={field.value}
-            onChange={field.onChange}
-          />
+          <TextField type="text" className="w-full" value={field.value} onChange={field.onChange}>
+            <Label>Note</Label>
+            <Input placeholder="Enter product note" />
+          </TextField>
         )}
       />
-      <div className="flex w-full gap-2 border-b-2 border-slate-400 pb-2">
-        <div className="flex justify-end items-center flex-1 min-w-[250px] gap-2">
-          <p className="text-sm">Price:</p>
-          {selectedSku && <p className="font-medium">{formatCurrency(selectedSku.price)}đ x </p>}
+      <div className="items-center w-full gap-2 pb-2 border-b-2 border-slate-400">
+        <div className="grid grid-cols-2">
+          <div />
+          <p className="w-full text-right dark:text-white">Quantity</p>
         </div>
-        <Controller
-          name="qtyChange"
-          control={formInfo.control}
-          render={({ field }) => (
-            <Input
-              isRequired
-              label="Quantity"
-              type="text"
-              placeholder="Enter product quantity"
-              size="sm"
-              errorMessage={isValid.qtyChange && isValid.isSubmit ? undefined : "Quantity must be greater than 0"}
-              isInvalid={!isValid.qtyChange && isValid.isSubmit}
-              value={field.value.toString()}
-              // className="w-[100px]"
-              onChange={(e) => {
-                const value = e.target.value.replace(/[^0-9]/g, "");
-                if (!value) return field.onChange(0);
-                field.onChange(Number(value));
-              }}
-            />
-          )}
-        />
+        <div className="grid grid-cols-2">
+          <div className="flex justify-start items-center flex-1 min-w-[250px] gap-2">
+            <p className="text-sm">Price:</p>
+            {selectedSku && <p className="font-medium">{formatCurrency(selectedSku.price)}đ x </p>}
+          </div>
+          <Controller
+            name="qtyChange"
+            control={formInfo.control}
+            render={({ field }) => (
+              <TextField
+                isRequired
+                type="text"
+                className="w-full"
+                value={field.value.toString()}
+                onChange={(v) => {
+                  const value = v.replace(/[^0-9]/g, "");
+                  field.onChange(value ? Number(value) : 0);
+                }}
+              >
+                <Input placeholder="Enter product quantity" className="text-right" />
+              </TextField>
+            )}
+          />
+        </div>
       </div>
-      <div className="flex justify-end items-center gap-4">
+      <div className="flex items-center justify-end gap-4">
         <p className="text-sm">Total Price:</p>
-        <p className="font-medium text-lg">
+        <p className="text-lg font-medium">
           {selectedSku ? formatCurrency(selectedSku.price * watchedQuantityChange) : formatCurrency(0)}đ
         </p>
       </div>
-    </>
+    </div>
   );
 };
 
