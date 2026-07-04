@@ -6,7 +6,6 @@ import { assignPermissionToRole } from "@/app/(app)/role/actions";
 import useToast from "../../_hooks/use-toast";
 import { addPermission, removePermission } from "@/utils/rbac.utils";
 import { Action, Resource } from "@/types/auth.types";
-import { useAuth } from "../../_providers/authProvider";
 import AvailablePermissionList from "./role-list/AvailablePermissionList";
 import RolePermissionList from "./role-list/RolePermissionList";
 
@@ -23,8 +22,6 @@ const AssignPermissionDialog = ({ ref, item }: AssignPermissionDialogProps) => {
   const state = useOverlayState();
   const [selectedRole, setSelectedRole] = useState<RoleType>();
   const { toast } = useToast();
-  const { setAuthSession } = useAuth();
-  console.log("selectedRole", selectedRole);
 
   const rolePermissionMap: Map<Resource, string[]> = useMemo(() => {
     const rolePermissions = selectedRole?.permissions ? { ...selectedRole?.permissions } : undefined;

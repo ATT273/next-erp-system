@@ -113,7 +113,6 @@ const RoleDialog = ({ ref, item }: RoleDialogProps) => {
 
   const handleSubmit = async (values: RoleType & { id?: string }) => {
     if (item?.id) {
-      console.log("udpate role", values);
       const res = await updateRole({
         id: item.id,
         name: values.name,
@@ -121,7 +120,6 @@ const RoleDialog = ({ ref, item }: RoleDialogProps) => {
         active: values.active,
         description: values.description ?? "",
       });
-      console.log("ress update", res);
       if (res.status === 200) {
         toast.success({ title: "Success", message: "Role updated successfully" });
         state.close();
@@ -152,7 +150,6 @@ const RoleDialog = ({ ref, item }: RoleDialogProps) => {
 
   useEffect(() => {
     if (item) {
-      console.log("item loaded", item);
       formInfo.reset({
         id: item.id,
         code: item.code,
@@ -178,9 +175,7 @@ const RoleDialog = ({ ref, item }: RoleDialogProps) => {
             <Modal.Body>
               <form
                 id="role-form"
-                onSubmit={formInfo.handleSubmit(handleSubmit, () => {
-                  console.log("error", formInfo.formState.errors);
-                })}
+                onSubmit={formInfo.handleSubmit(handleSubmit)}
                 className="flex flex-col items-center gap-3 py-2 overflow-y-auto"
               >
                 <div className="flex flex-col w-full gap-2 p-2">

@@ -39,7 +39,7 @@ const InventoryTable = () => {
   const { inventoriesData, meta, getInventoriesData } = useGetInventories();
   const queryClient = useQueryClient();
   const { setSelectedId, setInventoryDetails, selectedInventoryId } = useInventoryStore();
-  console.log("inventoriesData", inventoriesData);
+
   const getDetails = async () => {
     const result = await getInventoryDetails(selectedInventoryId);
     if (result.status === 200) setInventoryDetails(result.data!);
@@ -89,7 +89,6 @@ const InventoryTable = () => {
             <Table.Content aria-label="Inventory list" selectionMode="none">
               <Table.Header>
                 {columns.map((column) => {
-                  console.log("column", column);
                   return (
                     <Table.Column
                       key={column.key}

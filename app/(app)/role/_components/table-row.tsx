@@ -19,7 +19,6 @@ interface RoleTableRowProps {
 
 const RoleTableRow = ({ item, openAssignRoleDialog, openEditDialog }: RoleTableRowProps) => {
   const { authSession } = useAuth();
-  console.log("authSession", authSession);
   const permissions = authSession?.permissions;
 
   const _canEdit = useMemo(() => {

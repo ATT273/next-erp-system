@@ -31,7 +31,7 @@ const EditProductDialog = ({ ref }: EditProductProps) => {
   const state = useOverlayState();
   const { data, isFetching } = useGetProductDetails(selectedProductId);
   const queryClient = useQueryClient();
-  console.log("data details", data);
+
   const handleSubmit: SubmitHandler<IProductForm & { skuItems: IProductSku[]; files: ClientImage[] }> = async (
     values,
   ) => {
@@ -53,7 +53,6 @@ const EditProductDialog = ({ ref }: EditProductProps) => {
       _data.images = [..._data.images, ...uploadResults];
     }
 
-    console.log("_data.images", _data.images);
     const result = await updateProduct(selectedProductId, _data);
     if (result.status === 200) {
       toast.success({ title: "Success", message: "Product updated successfully" });

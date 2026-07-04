@@ -36,7 +36,6 @@ const SignUpForm = () => {
 
   const onSignUp = async (values: z.infer<typeof formSchema>) => {
     const result = await signUp(values);
-    console.log("result done signup", result);
   };
 
   const form = useForm({

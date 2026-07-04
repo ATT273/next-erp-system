@@ -69,7 +69,7 @@ const ProductTable = () => {
     }
     SKUModalRef.current?.handleOpen();
   };
-  console.log("productsData product", productsData);
+
   return (
     <div className="flex flex-col flex-1 gap-4">
       <div className="flex-1 overflow-y-auto">

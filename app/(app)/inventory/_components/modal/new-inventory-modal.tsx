@@ -45,7 +45,7 @@ const NewInventory = ({ ref }: NewInventoryDialogProps) => {
     defaultValues: { skuId: "", qtyChange: 0, note: "", changeType: "SALES" },
     mode: "onSubmit",
   });
-  console.log("productData inventory", productsData);
+
   const handleAddNewInventory = async (data: IInventoryFormValues) => {
     try {
       const result = await addInventory({ data });

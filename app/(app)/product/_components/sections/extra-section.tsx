@@ -19,7 +19,6 @@ const ExtraSection = ({ updateImages, productDetails }: Props) => {
   const [files, setFiles] = useState<ClientImage[]>([]);
 
   const handleSelectFile = (value: File[]) => {
-    console.log("file value", value);
     const file = value.map((item) => ({ file: item, url: URL.createObjectURL(item), name: item.name }));
     setFiles([...files, ...file]);
   };
@@ -46,7 +45,6 @@ const ExtraSection = ({ updateImages, productDetails }: Props) => {
           type="file"
           placeholder="upload product image"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            console.log("eeee", e);
             handleSelectFile(e.target.files ? Array.from(e.target.files) : []);
           }}
         />

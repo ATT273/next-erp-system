@@ -22,7 +22,6 @@ const Role = async () => {
     page: 1,
     limit: 10,
   });
-  console.log("roles", roles);
   return (
     <div className="relative p-3">
       <div className="flex items-center justify-between mb-3">
