@@ -41,3 +41,5 @@ AGENTS.md
 
 # vscode
 .vscode/
+
+/app/generated/prisma

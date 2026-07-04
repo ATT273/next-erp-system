@@ -1,9 +1,9 @@
 import React from "react";
 import ProductTable from "./_components/table";
-import NewProduct from "./_components/drawer/new-product-drawer";
+import NewProduct from "./_components/modals/product-modal/NewProductDialog";
 import { getSession } from "@/app/actions";
 import { redirect } from "next/navigation";
-import Forbidden from "@/components/pages/forbiden";
+import Forbidden from "@/components/pages/forbidden";
 import { canAccess } from "@/utils/rbac.utils";
 
 const Product = async () => {
@@ -17,9 +17,9 @@ const Product = async () => {
     }
   }
   return (
-    <div className="flex flex-col gap-4 h-full p-3 relative">
-      <div className="flex justify-between items-center mb-3">
-        <h1 className="font-bold text-2xl mb-3">Products list</h1>
+    <div className="relative flex flex-col h-full gap-4 p-3">
+      <div className="flex items-center justify-between mb-3">
+        <h1 className="mb-3 text-2xl font-bold">Products list</h1>
         <NewProduct />
       </div>
       <ProductTable />

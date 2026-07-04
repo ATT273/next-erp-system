@@ -9,7 +9,7 @@ import { ChipColor } from "@/types/heroui.types";
 import { Chip, Link, Table } from "@heroui/react";
 import { IBaseOptionParams, IResponseMeta } from "@/types/response.types";
 import { DEFAULT_META } from "@/constants/response.constants";
-import CustomPagination from "@/components/ui/Pagination";
+import CustomPagination from "@/components/customs/Pagination";
 
 const columns = [
   { id: "id", label: "ID", className: "w-[220px]" },
@@ -56,17 +56,25 @@ const DashboardTable = () => {
             <Table.Content aria-label="Inventory list">
               <Table.Header>
                 {columns.map((column) => (
-                  <Table.Column key={column.id} className={column.className}>{column.label}</Table.Column>
+                  <Table.Column key={column.id} className={column.className}>
+                    {column.label}
+                  </Table.Column>
                 ))}
               </Table.Header>
               <Table.Body>
                 {summaries.map((item) => {
-                  const chipColor = CHANGE_TYPE_LABELS[item.changeType as keyof typeof CHANGE_TYPE_LABELS]?.color ?? "default";
+                  const chipColor =
+                    CHANGE_TYPE_LABELS[item.changeType as keyof typeof CHANGE_TYPE_LABELS]?.color ?? "default";
                   return (
                     <Table.Row key={item.id} id={item.id}>
                       <Table.Cell className="w-[220px]">{item.id}</Table.Cell>
                       <Table.Cell>
-                        <Link href={`product/${item.id}`} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-sky-500">
+                        <Link
+                          href={`product/${item.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-zinc-500 hover:text-sky-500"
+                        >
                           {item.productName}
                           <Link.Icon />
                         </Link>
@@ -84,7 +92,13 @@ const DashboardTable = () => {
           </Table.ScrollContainer>
         </Table>
       </div>
-      <CustomPagination showControls total={meta.totalPages} initialPage={meta.page} onChange={onPageChange} className="flex justify-end" />
+      <CustomPagination
+        showControls
+        total={meta.totalPages}
+        initialPage={meta.page}
+        onChange={onPageChange}
+        className="flex justify-end"
+      />
     </div>
   );
 };

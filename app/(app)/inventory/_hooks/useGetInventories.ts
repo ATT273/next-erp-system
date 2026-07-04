@@ -1,37 +1,44 @@
 import { useState } from "react";
-import { getInventories } from "../actions";
-import { InventoryType } from "@/types/inventory.type";
-import { IBaseOptionParams } from "@/types/response.types";
-import { DEFAULT_META } from "@/constants/response.constants";
 import { useQuery } from "@tanstack/react-query";
+import { getInventories } from "../actions";
+import { IInventoryListRequestParams } from "@/types/requests/inventory.request";
+import { IResponseMeta } from "@/types/response.types";
+import { DEFAULT_META } from "@/constants/response.constants";
+import { InventoryItemType } from "@/types/responses/inventory.response";
 
-interface UseGetInventoriesProps {
-  params?: IBaseOptionParams & { type?: InventoryType };
-  options?: {
-    enabled?: boolean;
-  };
-}
 export const INVENTORY_QUERY_KEY = "inventoriesData";
-const useGetInventories = ({ params, options }: UseGetInventoriesProps) => {
-  const [keyword, setKeyword] = useState<string>("");
-  const { enabled } = options || {};
 
-  const { data, isFetching, refetch } = useQuery({
+const useGetInventories = () => {
+  const [params, setParams] = useState<IInventoryListRequestParams>({ page: 1, limit: 10 });
+
+  const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: [INVENTORY_QUERY_KEY, params],
-    queryFn: async () => {
-      const res = await getInventories(params);
-      return res;
-    },
-    enabled: enabled ?? true,
+    queryFn: () => getInventories(params),
   });
 
+  const inventoriesData: InventoryItemType[] = data?.data?.data ?? [];
+
+  const meta: IResponseMeta = {
+    page: data?.data?.meta?.page ?? DEFAULT_META.page,
+    limit: data?.data?.meta?.limit ?? DEFAULT_META.limit,
+    total: data?.data?.meta?.total ?? DEFAULT_META.total,
+    count: data?.data?.meta?.count ?? DEFAULT_META.count,
+    totalPages: data?.data?.meta?.totalPages ?? DEFAULT_META.totalPages,
+    hasNextPage: data?.data?.meta?.hasNextPage ?? false,
+    nextPage: data?.data?.meta?.nextPage ?? null,
+  };
+
+  const getInventoriesData = (options: IInventoryListRequestParams) => {
+    setParams(options);
+  };
+
   return {
-    inventoriesData: data?.data.data || [],
-    meta: data?.data?.meta || DEFAULT_META,
-    keyword,
-    isFetchingInventories: isFetching,
-    refetchInventories: refetch,
-    setKeyword,
+    inventoriesData,
+    meta,
+    isLoading,
+    isFetching,
+    getInventoriesData,
+    refetch,
   };
 };
 

@@ -16,7 +16,7 @@ export type ProductType = {
   images: IProductImage[];
 };
 
-export type ProductResponseType = {
+export type ProductDataResponseType = {
   id: string;
   name: string;
   description: string;
@@ -90,12 +90,12 @@ export interface IProductForm {
   unit: string;
   price: number;
   importPrice: number;
-  // qty: number;
   sizes?: string[];
   tags?: string[];
   description?: string;
 }
 
 export interface IProductPayload extends IProductForm {
+  skus: string[];
   images: IProductImage[];
 }

@@ -1,10 +1,10 @@
 import React from "react";
-import RoleTable from "./components/table";
+import RoleTable from "./_components/table";
 import { getSession } from "@/app/actions";
 import { redirect } from "next/navigation";
-import Forbidden from "@/components/pages/forbiden";
-import NewRole from "./components/new-role-drawer";
-import { getRoleList } from "./actions";
+import Forbidden from "@/components/pages/forbidden";
+import NewRoleDialogTrigger from "./_components/role-dialog/NewRoleDialogTrigger";
+import { getRoles } from "./actions";
 import { canAccess } from "@/utils/rbac.utils";
 
 const Role = async () => {
@@ -18,14 +18,18 @@ const Role = async () => {
       return <Forbidden />;
     }
   }
-  const roles = await getRoleList();
+  const roles = await getRoles({
+    page: 1,
+    limit: 10,
+  });
+  console.log("roles", roles);
   return (
-    <div className="p-3 relative">
-      <div className="flex justify-between items-center mb-3">
-        <h1 className="font-bold text-2xl mb-3">Roles</h1>
-        <NewRole />
+    <div className="relative p-3">
+      <div className="flex items-center justify-between mb-3">
+        <h1 className="mb-3 text-2xl font-bold">Roles</h1>
+        <NewRoleDialogTrigger />
       </div>
-      <RoleTable roles={roles} />
+      {roles?.data.data && <RoleTable roles={roles?.data.data} />}
     </div>
   );
 };

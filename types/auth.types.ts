@@ -1,5 +1,3 @@
-import { PERMISSION_VALUE } from "@/constants";
-
 export interface ISession {
   id?: string;
   email?: string;
@@ -7,14 +5,7 @@ export interface ISession {
   accessToken?: string;
   roleCode?: string;
   roleActive?: boolean;
-  permissions?: Permissions;
-}
-
-export interface IPermissions {
-  dashboard: number;
-  user: number;
-  product: number;
-  role: number;
+  permissions?: ResourcePermission;
 }
 
 export interface IMenu {
@@ -22,9 +13,10 @@ export interface IMenu {
   title: string;
   icon: string;
   href: string;
-  permissions: PermissionKey[];
+  permissions: Action[];
 }
 
-export type PermissionKey = keyof typeof PERMISSION_VALUE;
+export type Action = "access" | "view" | "create" | "edit" | "delete" | "assign";
 export type Resource = "dashboard" | "product" | "user" | "role" | "inventory" | "profile";
-export type Permissions = Record<Resource, number>;
+export type ResourcePermission = Partial<Record<Resource, Action[]>>;
+// export type Permissions = Partial<ResourcePermission>;

@@ -1,13 +1,13 @@
 "use client";
 
-import LogInForm from "./component/login-form";
-import SignUpForm from "./component/signup-form";
+import LogInForm from "./_component/login-form";
+import SignUpForm from "./_component/signup-form";
 import { Tabs } from "@heroui/react";
 
 const Login = () => {
   return (
-    <div className="h-full w-full">
-      <div className="flex flex-col gap-3 p-3 absolute w-1/4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white shadow-md rounded-md">
+    <div className="w-full h-full">
+      <div className="absolute flex flex-col w-1/4 gap-3 p-3 -translate-x-1/2 -translate-y-1/2 bg-white rounded-md shadow-md top-1/2 left-1/2">
         <Tabs>
           <Tabs.ListContainer>
             <Tabs.List aria-label="authenticate">

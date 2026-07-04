@@ -1,161 +1,74 @@
 "use server";
 
-import { getSession } from "@/app/actions";
 import { IFormUser, IUserResponse } from "@/types/user.type";
-import { revalidatePath } from "next/cache";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "${API_URL}";
-export const getUserDetails = async (id: string) => {
-  const user = await getSession();
-  const res = await fetch(`${API_URL}/users/${id}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${user?.accessToken}`,
-    },
-  });
-  if (!res || res.status !== 200) {
-    throw new Error("User not found");
-  }
-  if (res.status === 200) {
-    return res.json();
-  }
-};
+import { getUsersList } from "./_services/get-users-list";
+import { getUserDetails as getUserDetailsService } from "./_services/get-user-details";
+import { createUser as createUserService } from "./_services/create-user";
+import { updateUser as updateUserService } from "./_services/update-user";
+import { deleteUser as deleteUserService } from "./_services/delete-user";
+import { resetUserPassword as resetUserPasswordService } from "./_services/reset-user-password";
 
 export const getUsers = async (): Promise<{ status: number; data: IUserResponse[] | null }> => {
-  const user = await getSession();
   try {
-    const res = await fetch(`${API_URL}/users`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user?.accessToken}`,
-      },
-    });
-    if (res.status === 200) {
-      const response = await res.json();
-      return {
-        status: res.status,
-        data: response.data,
-      };
-    }
-    // Ensure a return statement for all code paths
-    return {
-      status: res.status,
-      data: null,
-    };
+    const data = await getUsersList();
+    return { status: 200, data };
   } catch (error) {
     console.log("error", error);
-    return {
-      status: 500,
-      data: null,
-    };
+    return { status: 500, data: null };
   }
 };
 
-export const deleteUser = async (id: string): Promise<{ status: number; data: null }> => {
-  const user = await getSession();
+export const getUserDetails = async (id: string): Promise<{ status: number; data: IUserResponse | null }> => {
   try {
-    const res = await fetch(`${API_URL}/users/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user?.accessToken}`,
-      },
-    });
-    const jsonRes = await res.json();
-    if (res.status === 200) {
-      revalidatePath("/(app)/user", "page");
-      return jsonRes;
-    }
-    throw new Error(jsonRes.message || "Failed to delete user");
+    const data = await getUserDetailsService(id);
+    if (!data) return { status: 404, data: null };
+    return { status: 200, data };
   } catch (error) {
     console.log("error", error);
-    return {
-      status: 500,
-      data: null,
-    };
+    return { status: 500, data: null };
   }
 };
 
-export const createUser = async (data: IFormUser): Promise<{ status: number; code: string; message: string }> => {
-  const user = await getSession();
+export const createUser = async (data: IFormUser): Promise<{ status: number; message: string }> => {
   try {
-    const res = await fetch(`${API_URL}/users`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user?.accessToken}`,
-      },
-      body: JSON.stringify(data),
-    });
-    const jsonRes = await res.json();
-    if (res.status === 201) {
-      revalidatePath("/(app)/user", "page");
-    }
-
-    return { status: jsonRes.data.status, code: jsonRes.data.code, message: jsonRes.data.message };
+    const result = await createUserService(data);
+    if (!result.success) return { status: 400, message: result.message };
+    return { status: 200, message: result.message };
   } catch (error) {
     console.log("error", error);
-    return {
-      status: 500,
-      code: "INTERNAL_ERROR",
-      message: "An unknown error occurred",
-    };
+    return { status: 500, message: "Internal Server Error" };
   }
 };
 
-export const updateUser = async (
-  id: string,
-  data: IFormUser
-): Promise<{ status: number; code: string; message: string }> => {
-  const user = await getSession();
+export const updateUser = async (id: string, data: IFormUser): Promise<{ status: number; message: string }> => {
   try {
-    const res = await fetch(`${API_URL}/users/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user?.accessToken}`,
-      },
-      body: JSON.stringify(data),
-    });
-    const jsonRes = await res.json();
-    if (res.status === 200) {
-      revalidatePath("/(app)/user", "page");
-    }
-    return { status: jsonRes.data.status, code: jsonRes.data.code, message: jsonRes.data.message };
+    const result = await updateUserService(id, data);
+    if (!result.success) return { status: 400, message: result.message };
+    return { status: 200, message: result.message };
   } catch (error) {
     console.log("error", error);
-    return {
-      status: 500,
-      code: "INTERNAL_ERROR",
-      message: "An unknown error occurred",
-    };
+    return { status: 500, message: "Internal Server Error" };
   }
 };
 
-export const resetUserPassword = async (data: { id: string; password: string }) => {
-  const user = await getSession();
+export const deleteUser = async (id: string): Promise<{ status: number; message: string }> => {
   try {
-    const res = await fetch(`${API_URL}/users/reset-password/${data.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user?.accessToken}`,
-      },
-      body: JSON.stringify(data),
-    });
-    const jsonRes = await res.json();
-    if (res.status === 200) {
-      revalidatePath("/(app)/user", "page");
-    }
-    return { status: jsonRes.data.status, code: jsonRes.data.code, message: jsonRes.data.message };
+    const result = await deleteUserService(id);
+    if (!result.success) return { status: 400, message: result.message };
+    return { status: 200, message: result.message };
   } catch (error) {
     console.log("error", error);
-    return {
-      status: 500,
-      code: "INTERNAL_ERROR",
-      message: "An unknown error occurred",
-    };
+    return { status: 500, message: "Internal Server Error" };
+  }
+};
+
+export const resetUserPassword = async (data: { id: string; password: string }): Promise<{ status: number; message: string }> => {
+  try {
+    const result = await resetUserPasswordService(data.id, data.password);
+    if (!result.success) return { status: 400, message: result.message };
+    return { status: 200, message: result.message };
+  } catch (error) {
+    console.log("error", error);
+    return { status: 500, message: "Internal Server Error" };
   }
 };

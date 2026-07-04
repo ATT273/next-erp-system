@@ -1,9 +1,7 @@
-import React from "react";
 import { getSession } from "@/app/actions";
 import { redirect } from "next/navigation";
-import Forbidden from "@/components/pages/forbiden";
-import PageContent from "./_components/page-content";
-import { getUsers } from "./actions";
+import Forbidden from "@/components/pages/forbidden";
+import PageContent from "./_components/PageContent";
 import { canAccess } from "@/utils/rbac.utils";
 
 const User = async () => {
@@ -17,10 +15,9 @@ const User = async () => {
       return <Forbidden />;
     }
   }
-  const userData = await getUsers();
   return (
-    <div className="h-dvh p-3 flex-1">
-      {userData.data ? <PageContent users={userData.data} /> : <div>No user data available</div>}
+    <div className="flex-1 p-3 h-dvh">
+      <PageContent />
     </div>
   );
 };

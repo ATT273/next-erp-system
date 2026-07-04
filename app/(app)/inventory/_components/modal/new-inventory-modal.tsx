@@ -1,17 +1,18 @@
 "use client";
 
 import { Button, Modal, useOverlayState } from "@heroui/react";
-import { ForwardedRef, useEffect, useImperativeHandle, useState } from "react";
+import { ForwardedRef, useEffect, useImperativeHandle, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import useToast from "@/app/(app)/_hooks/use-toast";
 import { useInventoryStore } from "../../_store/inventory-store";
-import { permissionsValue } from "@/constants";
+import { canEdit } from "@/utils/rbac.utils";
+import { useAuth } from "@/app/(app)/_providers/authProvider";
 import NewInventoryForm from "../form/new-inventory-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { formInfoSchema } from "../../_types/inventory.schema";
+import { formInventorySchema } from "../../_types/inventory.schema";
 import useGetProducts from "../../../product/_hooks/use-get-products";
-import { INewInventoryForm, IResponseInventoryDetail } from "@/types/inventory.type";
+import { type IInventoryFormValues } from "../../_types/inventory.schema";
 import { INVENTORY_QUERY_KEY } from "../../_hooks/useGetInventories";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUpdateInventory } from "../../_hooks/useUpdateInventory";
@@ -29,19 +30,23 @@ export interface InventoryDialogRef {
 const NewInventory = ({ ref }: NewInventoryDialogProps) => {
   const queryClient = useQueryClient();
   const { setSelectedId, setInventoryDetails, selectedInventoryId, inventoryDetails } = useInventoryStore();
-  const [permissions, setPermissions] = useState({ access: false, edit: false, delete: false });
+  const { authSession } = useAuth();
+  const _canEdit = useMemo(() => {
+    if (!authSession?.permissions) return false;
+    return canEdit(authSession.permissions, "inventory");
+  }, [authSession?.permissions]);
   const { toast } = useToast();
   const { productsData, getProductsData } = useGetProducts();
   const state = useOverlayState();
   const { updateInventory, isUpdating } = useUpdateInventory();
   const { addInventory, isAdding } = useAddInventory();
-  const formInfo = useForm<z.infer<typeof formInfoSchema>>({
-    resolver: zodResolver(formInfoSchema),
+  const formInfo = useForm<z.infer<typeof formInventorySchema>>({
+    resolver: zodResolver(formInventorySchema),
     defaultValues: { skuId: "", qtyChange: 0, note: "", changeType: "SALES" },
     mode: "onSubmit",
   });
-
-  const handleAddNewInventory = async (data: INewInventoryForm) => {
+  console.log("productData inventory", productsData);
+  const handleAddNewInventory = async (data: IInventoryFormValues) => {
     try {
       const result = await addInventory({ data });
       if (result.status === 200) {
@@ -57,14 +62,14 @@ const NewInventory = ({ ref }: NewInventoryDialogProps) => {
     }
   };
 
-  const handleUpdateInventory = async (id: string, data: INewInventoryForm) => {
+  const handleUpdateInventory = async (id: string, data: IInventoryFormValues) => {
     try {
       const result = await updateInventory({ id, data });
       if (result.status === 200) {
         toast.success({ title: "Success", message: "Inventory updated successfully" });
         formInfo.reset();
         queryClient.invalidateQueries({ queryKey: [INVENTORY_QUERY_KEY], exact: false, refetchType: "active" });
-        setInventoryDetails({} as IResponseInventoryDetail);
+        setInventoryDetails(null);
         state.close();
       } else {
         toast.error({ title: "Failed", message: `Failed to update inventory: ${result.message}` });
@@ -86,21 +91,17 @@ const NewInventory = ({ ref }: NewInventoryDialogProps) => {
   useImperativeHandle(ref, () => ({ handleClose: () => state.close(), handleOpen: () => state.open() }), []);
 
   useEffect(() => {
-    const localUser = localStorage.getItem("user");
-    if (localUser) {
-      const user = JSON.parse(localUser);
-      setPermissions({
-        access: !!(user.permissions & permissionsValue.ACCESS),
-        edit: !!(user.permissions & permissionsValue.EDIT),
-        delete: !!(user.permissions & permissionsValue.DELETE),
-      });
-    }
     getProductsData({ page: 1, limit: 100 });
   }, []);
 
   useEffect(() => {
     if (inventoryDetails && inventoryDetails.id) {
-      formInfo.reset({ skuId: inventoryDetails.skuId, qtyChange: inventoryDetails.qtyChange, note: inventoryDetails.note, changeType: inventoryDetails.changeType });
+      formInfo.reset({
+        skuId: inventoryDetails.skuId,
+        qtyChange: inventoryDetails.qtyChange,
+        note: inventoryDetails.note ?? undefined,
+        changeType: inventoryDetails.changeType,
+      });
     }
   }, [inventoryDetails]);
 
@@ -122,7 +123,7 @@ const NewInventory = ({ ref }: NewInventoryDialogProps) => {
                     key="new-inventory-form"
                     id="new-inventory-form"
                     onSubmit={formInfo.handleSubmit(onSubmit)}
-                    className="flex flex-col gap-3 items-center overflow-y-auto"
+                    className="flex flex-col items-center gap-3 overflow-y-auto"
                   >
                     <NewInventoryForm products={productsData} />
                   </form>
@@ -134,7 +135,7 @@ const NewInventory = ({ ref }: NewInventoryDialogProps) => {
                   type="submit"
                   form="new-inventory-form"
                   className="bg-emerald-500"
-                  disabled={isUpdating || isAdding}
+                  isDisabled={isUpdating || isAdding}
                 >
                   {inventoryDetails && inventoryDetails.id ? "Update" : "Save"}
                 </Button>
@@ -144,7 +145,7 @@ const NewInventory = ({ ref }: NewInventoryDialogProps) => {
         </Modal.Backdrop>
       </Modal>
       {!ref && (
-        <Button onPress={() => state.open()} disabled={!permissions.edit}>
+        <Button onPress={() => state.open()} isDisabled={!_canEdit}>
           Add inventory change
         </Button>
       )}

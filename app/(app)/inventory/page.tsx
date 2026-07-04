@@ -1,6 +1,6 @@
 import { getSession } from "@/app/actions";
 import { redirect } from "next/navigation";
-import Forbidden from "@/components/pages/forbiden";
+import Forbidden from "@/components/pages/forbidden";
 import InventoryTable from "./_components/table";
 import NewInventory from "./_components/modal/new-inventory-modal";
 import { canAccess } from "@/utils/rbac.utils";

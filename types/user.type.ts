@@ -3,7 +3,7 @@ export interface IUserResponse {
   id: string;
   name: string;
   email: string;
-  active: boolean;
+  isOnline: boolean;
   dob: string;
 }
 

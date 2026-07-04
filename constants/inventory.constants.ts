@@ -1,0 +1,6 @@
+export const INVENTORY_CHANGE_TYPES = {
+  SALES: "SALES",
+  IMPORT: "IMPORT",
+  ADJUSTMENT: "ADJUSTMENT",
+  RETURN: "RETURN",
+} as const;
